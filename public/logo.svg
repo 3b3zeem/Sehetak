@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <!-- Icon Emblem on the LEFT -->
+  <g transform="translate(24, 25) scale(0.085)">
+    <g transform="rotate(42)">
+      <!-- Solid Half of Pill -->
+      <path d="M -96 20 A 96 96 0 0 0 96 20 L 96 5 L -96 5 Z" fill="#008080" />
+      <!-- Outlined Cap of Pill -->
+      <path d="M -82 -25 L -82 -105 A 78 78 0 0 1 82 -105 L 82 -25" fill="none" stroke="#008080" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+
+  <!-- Text "sehetak" on the RIGHT -->
+  <text x="56" y="36" fill="#475569" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="32" letter-spacing="-0.5">sehetak</text>
+</svg>

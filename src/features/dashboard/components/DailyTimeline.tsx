@@ -1,24 +1,38 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useDailyTimeline } from '../hooks/useDailyTimeline';
-import { useMealOffsetStore } from '@/stores/useMealOffsetStore';
-import { CardSkeleton } from '@/components/feedback/skeletons';
-import { Button } from '@/components/ui/button';
-import { Modal } from '@/components/ui/modal';
-import { Input } from '@/components/ui/input';
-import { AdherenceRing, UniqueCardReveal, FloatingBadge } from '@/components/animations';
-import { toast } from 'sonner';
-import { Sun, Sunset, Moon, CheckCircle2, XCircle, Clock, Utensils, Award } from 'lucide-react';
+import React, { useState } from "react";
+import { useDailyTimeline } from "../hooks/useDailyTimeline";
+import { useMealOffsetStore } from "@/stores/useMealOffsetStore";
+import { CardSkeleton } from "@/components/feedback/skeletons";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import {
+  AdherenceRing,
+  UniqueCardReveal,
+  FloatingBadge,
+} from "@/components/animations";
+import { toast } from "sonner";
+import {
+  Sun,
+  Sunset,
+  Moon,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Utensils,
+  Award,
+} from "lucide-react";
 
 interface TimelineProps {
-  locale: 'en' | 'ar';
+  locale: "en" | "ar";
   dict: any;
 }
 
 export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
   const { doses, adherenceScore, isLoading, toggleDose } = useDailyTimeline();
-  const { breakfastTime, lunchTime, dinnerTime, setMealTimes } = useMealOffsetStore();
+  const { breakfastTime, lunchTime, dinnerTime, setMealTimes } =
+    useMealOffsetStore();
 
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [bTime, setBTime] = useState(breakfastTime);
@@ -29,16 +43,16 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
     setMealTimes({ breakfastTime: bTime, lunchTime: lTime, dinnerTime: dTime });
 
     try {
-      await fetch('/api/user/meals/anchor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/user/meals/anchor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           breakfast_time: bTime,
           lunch_time: lTime,
           dinner_time: dTime,
         }),
       });
-      toast.success(dict.common?.success || 'Meal times updated');
+      toast.success(dict.common?.success || "Meal times updated");
     } catch {
       // client store updated
     }
@@ -75,18 +89,26 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
     sectionTitle: string,
     SectionIcon: any,
     bgAccent: string,
-    animationVariant: 'flip' | 'slide-skew' | 'fade-blur'
+    animationVariant: "flip" | "slide-skew" | "fade-blur",
   ) => (
     <UniqueCardReveal variant={animationVariant} delay={0.2}>
       <div className="bg-white border border-slate-300 p-6">
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${bgAccent} flex items-center justify-center font-bold`}>
+            <div
+              className={`w-10 h-10 ${bgAccent} flex items-center justify-center font-bold`}
+            >
               <SectionIcon className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-base">{sectionTitle}</h3>
-              <span className="text-xs text-slate-500">{doseList.length} medications scheduled</span>
+              <h3 className="font-bold text-slate-900 text-base">
+                {sectionTitle}
+              </h3>
+              <span className="text-xs text-slate-500">
+                {locale === "ar"
+                  ? `${doseList.length} أدوية مسجلة`
+                  : `${doseList.length} medications scheduled`}
+              </span>
             </div>
           </div>
         </div>
@@ -98,19 +120,22 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
         ) : (
           <div className="space-y-3">
             {doseList.map((d) => {
-              const timeStr = new Date(d.scheduled_for).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              const isTaken = d.status === 'taken';
-              const isSkipped = d.status === 'skipped';
+              const timeStr = new Date(d.scheduled_for).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              const isTaken = d.status === "taken";
+              const isSkipped = d.status === "skipped";
 
               return (
                 <div
                   key={d.id}
                   className={`p-4 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     isTaken
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                      ? "bg-emerald-50 border-emerald-300 text-emerald-900"
                       : isSkipped
-                      ? 'bg-slate-100 border-slate-300 text-slate-500 opacity-70'
-                      : 'bg-white border-slate-300 text-slate-900 hover:border-[#008080]'
+                        ? "bg-slate-100 border-slate-300 text-slate-500 opacity-70"
+                        : "bg-white border-slate-300 text-slate-900 hover:border-[#008080]"
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -120,8 +145,14 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm">{d.medication_name}</h4>
-                      <span className="text-xs text-slate-500 capitalize">{d.med_type} • {d.dosage}</span>
-                      {d.notes && <p className="text-xs text-slate-500 mt-1 italic">&quot;{d.notes}&quot;</p>}
+                      <span className="text-xs text-slate-500 capitalize">
+                        {d.med_type} • {d.dosage}
+                      </span>
+                      {d.notes && (
+                        <p className="text-xs text-slate-500 mt-1 italic">
+                          &quot;{d.notes}&quot;
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -129,29 +160,41 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
                   <div className="flex items-center gap-2 self-end sm:self-center">
                     <Button
                       size="sm"
-                      variant={isTaken ? 'primary' : 'outline'}
-                      className={isTaken ? 'bg-emerald-600 text-white border-none' : 'text-emerald-700 border-emerald-300 hover:bg-emerald-50'}
+                      variant={isTaken ? "primary" : "outline"}
+                      className={
+                        isTaken
+                          ? "bg-emerald-600 text-white border-none"
+                          : "text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+                      }
                       onClick={() =>
                         toggleDose({
                           medication_id: d.medication_id,
                           scheduled_for: d.scheduled_for,
-                          status: isTaken ? 'pending' : 'taken',
+                          status: isTaken ? "pending" : "taken",
                         })
                       }
                     >
                       <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                      <span>{isTaken ? dict.dashboard?.statusTaken : dict.dashboard?.markTaken}</span>
+                      <span>
+                        {isTaken
+                          ? dict.dashboard?.statusTaken
+                          : dict.dashboard?.markTaken}
+                      </span>
                     </Button>
 
                     <Button
                       size="sm"
-                      variant={isSkipped ? 'secondary' : 'ghost'}
-                      className={isSkipped ? 'bg-slate-300 text-slate-800' : 'text-slate-500 hover:text-slate-800'}
+                      variant={isSkipped ? "secondary" : "ghost"}
+                      className={
+                        isSkipped
+                          ? "bg-slate-300 text-slate-800"
+                          : "text-slate-500 hover:text-slate-800"
+                      }
                       onClick={() =>
                         toggleDose({
                           medication_id: d.medication_id,
                           scheduled_for: d.scheduled_for,
-                          status: isSkipped ? 'pending' : 'skipped',
+                          status: isSkipped ? "pending" : "skipped",
                         })
                       }
                     >
@@ -184,15 +227,22 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
                 </div>
               </FloatingBadge>
               <h4 className="text-xl font-extrabold text-slate-900">
-                {doses.filter((d) => d.status === 'taken').length} / {doses.length}
+                {doses.filter((d) => d.status === "taken").length} /{" "}
+                {doses.length}
               </h4>
-              <span className="text-xs text-slate-500">{dict.dashboard?.dosesTaken}</span>
+              <span className="text-xs text-slate-500">
+                {dict.dashboard?.dosesTaken}
+              </span>
             </div>
           </div>
         </UniqueCardReveal>
 
         {/* Dynamic Meal Anchors Control Card */}
-        <UniqueCardReveal variant="fade-blur" delay={0.25} className="md:col-span-2">
+        <UniqueCardReveal
+          variant="fade-blur"
+          delay={0.25}
+          className="md:col-span-2"
+        >
           <div className="bg-white border border-slate-300 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 h-full">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-slate-900 font-bold text-base">
@@ -200,7 +250,8 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
                 <span>{dict.dashboard?.mealAnchors}</span>
               </div>
               <p className="text-xs text-slate-500">
-                Meal-anchored medications automatically adapt to today&apos;s shift times.
+                Meal-anchored medications automatically adapt to today&apos;s
+                shift times.
               </p>
 
               <div className="flex items-center gap-3 pt-2">
@@ -216,7 +267,12 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
               </div>
             </div>
 
-            <Button variant="outline" size="sm" onClick={() => setIsShiftModalOpen(true)} className="gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsShiftModalOpen(true)}
+              className="gap-2 shrink-0"
+            >
               <Utensils className="w-4 h-4 text-[#008080]" />
               <span>{dict.dashboard?.shiftMeal}</span>
             </Button>
@@ -226,16 +282,34 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
 
       {/* Timeline Sections with Distinct Animation Variants */}
       <div className="space-y-6">
-        {renderDoseList(morningDoses, dict.dashboard?.morning || 'Morning Schedule', Sun, 'bg-amber-100 text-amber-800', 'flip')}
-        {renderDoseList(afternoonDoses, dict.dashboard?.afternoon || 'Afternoon Schedule', Sunset, 'bg-cyan-100 text-cyan-800', 'slide-skew')}
-        {renderDoseList(eveningDoses, dict.dashboard?.evening || 'Evening Schedule', Moon, 'bg-indigo-100 text-indigo-800', 'fade-blur')}
+        {renderDoseList(
+          morningDoses,
+          dict.dashboard?.morning || "Morning Schedule",
+          Sun,
+          "bg-amber-100 text-amber-800",
+          "flip",
+        )}
+        {renderDoseList(
+          afternoonDoses,
+          dict.dashboard?.afternoon || "Afternoon Schedule",
+          Sunset,
+          "bg-cyan-100 text-cyan-800",
+          "slide-skew",
+        )}
+        {renderDoseList(
+          eveningDoses,
+          dict.dashboard?.evening || "Evening Schedule",
+          Moon,
+          "bg-indigo-100 text-indigo-800",
+          "fade-blur",
+        )}
       </div>
 
       {/* Meal Shift Modal */}
       <Modal
         isOpen={isShiftModalOpen}
         onClose={() => setIsShiftModalOpen(false)}
-        title={dict.dashboard?.shiftMeal || 'Shift Meal Time'}
+        title={dict.dashboard?.shiftMeal || "Shift Meal Time"}
       >
         <div className="space-y-4">
           <Input
@@ -257,7 +331,10 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
             onChange={(e) => setDTime(e.target.value)}
           />
           <div className="pt-4 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsShiftModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsShiftModalOpen(false)}
+            >
               {dict.common?.cancel}
             </Button>
             <Button variant="primary" onClick={handleSaveMealTimes}>

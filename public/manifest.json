@@ -1,20 +1,20 @@
 {
-  "name": "Sehatak - صحتك",
-  "short_name": "Sehatak",
-  "description": "Bilingual Medical SaaS & Medication Compliance Companion",
-  "start_url": "/en",
+  "name": "sehetak - صحتك",
+  "short_name": "sehetak",
+  "description": "المنصة الذكية لإدارة الأدوية والتذكيرات والالتزام العلاجي",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#FAFCFF",
   "theme_color": "#008080",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
+      "src": "/icon.png",
+      "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
+      "src": "/logo.png",
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]

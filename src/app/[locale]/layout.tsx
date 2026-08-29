@@ -5,6 +5,43 @@ import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { CookieConsentBanner } from '@/components/feedback/CookieConsentBanner';
 import { createClient } from '@/lib/supabase/server';
+import { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === 'ar';
+
+  return {
+    title: isAr
+      ? 'Sehatak - صحتك | المنصة الذكية لإدارة الأدوية والمواعيد'
+      : 'Sehatak - Smart Medication & Health Companion',
+    description: isAr
+      ? 'تابع جدول أدوية اليوم والتذكيرات المباشرة عبر التليجرام وإشعارات المتصفح لتنظيم حياتك وصحتك.'
+      : 'Track your daily medications, receive automated Telegram & browser reminders, and manage doctor appointments effortlessly.',
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        ar: '/ar',
+        en: '/en',
+      },
+    },
+    openGraph: {
+      title: isAr ? 'sehetak - صحتك' : 'sehetak Medical Platform',
+      description: isAr
+        ? 'المنصة الذكية لإدارة الأدوية والمواعيد الطبية والتنبيهات المباشرة'
+        : 'Smart meal-anchored medication companion with instant Telegram bot reminders.',
+      url: `/${locale}`,
+      siteName: 'sehetak',
+      images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
+      locale: isAr ? 'ar_EG' : 'en_US',
+      type: 'website',
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -41,8 +78,26 @@ export default async function LocaleLayout({
     };
   }
 
+  // Schema.org Structured Data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    name: currentLocale === 'ar' ? 'صحتك - Sehatak' : 'Sehatak Medical App',
+    description:
+      currentLocale === 'ar'
+        ? 'منصة ذكية لإدارة الأدوية والتذكير التلقائي بمواعيد الجرعات'
+        : 'Smart medication schedule & compliance management platform',
+    image: '/logo.png',
+    inLanguage: currentLocale,
+    aspect: ['Diagnosis', 'Prevention', 'Treatment'],
+  };
+
   return (
     <div lang={currentLocale} dir={currentLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar locale={currentLocale} dict={dict} userProfile={userProfile} />
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}

@@ -3,6 +3,17 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export function usePushManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -12,7 +23,15 @@ export function usePushManager() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true);
       // Register service worker
-      navigator.serviceWorker.register('/sw.js').catch(console.error);
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(async (reg) => {
+          const existingSub = await reg.pushManager.getSubscription();
+          if (existingSub) {
+            setIsSubscribed(true);
+          }
+        })
+        .catch(console.error);
     }
   }, []);
 
@@ -22,12 +41,20 @@ export function usePushManager() {
       return;
     }
 
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidPublicKey) {
+      toast.error('VAPID Public Key is missing from configuration');
+      return;
+    }
+
     setLoading(true);
     try {
       const reg = await navigator.serviceWorker.ready;
+      const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
+        applicationServerKey: convertedKey,
       });
 
       const res = await fetch('/api/push/subscribe', {

@@ -1,6 +1,22 @@
 import React from 'react';
 import { getDictionary, Locale } from '@/lib/i18n';
 import { Pill, ShieldCheck, HeartPulse } from 'lucide-react';
+import { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === 'ar';
+  return {
+    title: isAr ? 'عن صحتك | sehetak' : 'About Us | sehetak',
+    description: isAr
+      ? 'تعرف على منصة صحتك sehetak ورسالتنا لتنظيم الأدوية وضمان الالتزام العلاجي عبر حلول تكنولوجية مبتكرة.'
+      : 'Discover sehetak medical SaaS mission to revolutionize medication compliance with intelligent scheduling.',
+  };
+}
 
 export default async function AboutPage({
   params,
@@ -33,7 +49,7 @@ export default async function AboutPage({
           <Pill className="w-8 h-8 text-[#0077b6]" />
           <h3 className="text-lg font-bold text-slate-900">Adherence Excellence</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
-            By anchoring medications around daily meal times and sending multi-channel reminders, Sehatak dramatically improves chronic condition management.
+            By anchoring medications around daily meal times and sending multi-channel reminders, sehetak dramatically improves chronic condition management.
           </p>
         </div>
       </div>

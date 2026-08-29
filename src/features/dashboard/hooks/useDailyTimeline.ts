@@ -1,14 +1,42 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalculatedDoseItem, ApiResponse, MedicationRow } from '@/types';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 export function useDailyTimeline() {
   const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  // Supabase Realtime Subscription for instantaneous updates across tabs/components
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime-timeline-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'medications' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
+        queryClient.invalidateQueries({ queryKey: ['medications'] });
+        queryClient.invalidateQueries({ queryKey: ['authenticated-home-user'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dose_logs' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['authenticated-home-user'] });
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, supabase]);
 
   const timelineQuery = useQuery({
     queryKey: ['dailyDoses'],
+    staleTime: 0,
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<{ doses: CalculatedDoseItem[]; adherenceScore: number }> => {
       // Fetch medications & logs for today
       const resMeds = await fetch('/api/user/medications');
@@ -18,19 +46,21 @@ export function useDailyTimeline() {
       // Calculate doses for today
       const todayStr = new Date().toISOString().split('T')[0];
       const computedDoses: CalculatedDoseItem[] = meds.map((m, idx) => {
-        let scheduledHour = 8;
-        if (m.frequency_mode === 'meal_anchored') {
-          if (m.meal_anchor === 'lunch') scheduledHour = 14;
-          else if (m.meal_anchor === 'dinner') scheduledHour = 20;
-          else scheduledHour = 8;
-        } else if (m.start_time) {
-          scheduledHour = parseInt(m.start_time.split(':')[0], 10) || 8;
-        } else {
-          scheduledHour = (idx * 4 + 8) % 24;
-        }
-
         const scheduledDate = new Date();
-        scheduledDate.setHours(scheduledHour, 0, 0, 0);
+
+        if (m.frequency_mode === 'meal_anchored') {
+          if (m.meal_anchor === 'lunch') scheduledDate.setHours(14, 0, 0, 0);
+          else if (m.meal_anchor === 'dinner') scheduledDate.setHours(20, 0, 0, 0);
+          else scheduledDate.setHours(8, 0, 0, 0);
+        } else if (m.start_time) {
+          const [sh, sm] = m.start_time.split(':');
+          const hours = parseInt(sh, 10) || 8;
+          const mins = parseInt(sm, 10) || 0;
+          scheduledDate.setHours(hours, mins, 0, 0);
+        } else {
+          const scheduledHour = (idx * 4 + 8) % 24;
+          scheduledDate.setHours(scheduledHour, 0, 0, 0);
+        }
 
         return {
           id: `computed-${m.id}-${todayStr}`,

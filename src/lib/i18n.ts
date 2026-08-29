@@ -11,7 +11,7 @@ const dictionaries: Record<Locale, Messages> = {
 };
 
 export function getDictionary(locale: Locale): Messages {
-  return dictionaries[locale] || dictionaries.en;
+  return dictionaries[locale] || dictionaries.ar;
 }
 
 /**

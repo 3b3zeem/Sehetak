@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 const PUBLIC_FILE = /\.(.*)$/;
-const LOCALES = ['en', 'ar'];
-const DEFAULT_LOCALE = 'en';
+const LOCALES = ['ar', 'en'];
+const DEFAULT_LOCALE = 'ar';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

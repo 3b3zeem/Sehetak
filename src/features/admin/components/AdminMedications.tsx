@@ -103,7 +103,7 @@ export const AdminMedications: React.FC<AdminMedicationsProps> = ({ locale, dict
                     size="sm"
                     variant="ghost"
                     onClick={() => deleteMutation.mutate(med.id)}
-                    isLoading={deleteMutation.isPending}
+                    isLoading={deleteMutation.isPending && deleteMutation.variables === med.id}
                     className="text-red-600 hover:bg-red-50 p-1.5"
                   >
                     <Trash2 className="w-4 h-4" />

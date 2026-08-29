@@ -22,8 +22,9 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import gsap from "gsap";
-import { MobileLink } from "../ui/mobileLink";
 import Image from "next/image";
+import { NavMenu } from "./NavMenu";
+import { MobileLink } from "./mobileLink";
 
 interface NavbarProps {
   locale: "en" | "ar";
@@ -41,8 +42,40 @@ export const Navbar: React.FC<NavbarProps> = ({
   const supabase = createClient();
 
   const [isOpen, setIsOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  // GSAP Scroll Direction Hide / Show Header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!headerRef.current) return;
+      const currentScrollY = window.scrollY;
+
+      // Hide header when scrolling down after threshold, show when scrolling up
+      if (currentScrollY > 60 && currentScrollY > lastScrollY.current) {
+        gsap.to(headerRef.current, {
+          yPercent: -100,
+          duration: 0.35,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      } else if (currentScrollY < lastScrollY.current) {
+        gsap.to(headerRef.current, {
+          yPercent: 0,
+          duration: 0.35,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -116,8 +149,11 @@ export const Navbar: React.FC<NavbarProps> = ({
     : "Profile";
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 shadow-sm"
+    >
+      <div className="px-4 sm:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo: logo.svg containing Icon on Left & Text on Right */}
         <Link
           href={`/${locale}`}
@@ -134,49 +170,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           />
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-          <Link
-            href={`/${locale}`}
-            className="hover:text-[#008080] transition-colors flex items-center gap-1.5"
-          >
-            <Home className="w-4 h-4" />
-            <span>{dict.nav?.home}</span>
-          </Link>
-          <Link
-            href={`/${locale}/about`}
-            className="hover:text-[#008080] transition-colors"
-          >
-            {dict.nav?.about}
-          </Link>
-          <Link
-            href={`/${locale}/contact`}
-            className="hover:text-[#008080] transition-colors"
-          >
-            {dict.nav?.contact}
-          </Link>
-
-          {userProfile && (
-            <>
-              <Link
-                href={dashboardPath}
-                className="hover:text-[#008080] transition-colors flex items-center gap-1.5 font-bold text-[#008080]"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>{dict.nav?.dashboard}</span>
-              </Link>
-              {userProfile.role === "admin" && (
-                <Link
-                  href={`/${locale}/dashboard/admin`}
-                  className="px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-800 flex items-center gap-1 hover:bg-amber-200 transition-colors border border-amber-300"
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>{dict.nav?.admin}</span>
-                </Link>
-              )}
-            </>
-          )}
-        </nav>
+        {/* Desktop Navigation Links with Shared GSAP Sliding Liquid Blob */}
+        <NavMenu
+          locale={locale}
+          dict={dict}
+          userProfile={userProfile}
+          dashboardPath={dashboardPath}
+        />
 
         {/* Action Controls & Mobile Trigger */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -259,19 +259,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             href={`/${locale}`}
             icon={Home}
             label={dict.nav?.home}
-            setIsOpen={setIsOpen}
+            onClose={() => setIsOpen(false)}
           />
           <MobileLink
             href={`/${locale}/about`}
             icon={Info}
             label={dict.nav?.about}
-            setIsOpen={setIsOpen}
+            onClose={() => setIsOpen(false)}
           />
           <MobileLink
             href={`/${locale}/contact`}
             icon={Mail}
             label={dict.nav?.contact}
-            setIsOpen={setIsOpen}
+            onClose={() => setIsOpen(false)}
           />
 
           {userProfile ? (
@@ -285,7 +285,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 icon={LayoutDashboard}
                 label={dict.nav?.dashboard}
                 variant="primary"
-                setIsOpen={setIsOpen}
+                onClose={() => setIsOpen(false)}
               />
               <MobileLink
                 href={`${dashboardPath}/medications`}
@@ -294,7 +294,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   dict.medications?.title ||
                   (locale === "ar" ? "الأدوية" : "Medications")
                 }
-                setIsOpen={setIsOpen}
+                onClose={() => setIsOpen(false)}
               />
               <MobileLink
                 href={`${dashboardPath}/appointments`}
@@ -303,7 +303,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   dict.appointments?.title ||
                   (locale === "ar" ? "المواعيد" : "Appointments")
                 }
-                setIsOpen={setIsOpen}
+                onClose={() => setIsOpen(false)}
               />
               <MobileLink
                 href={`${dashboardPath}/settings`}
@@ -312,7 +312,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   dict.settings?.title ||
                   (locale === "ar" ? "الإعدادات" : "Settings")
                 }
-                setIsOpen={setIsOpen}
+                onClose={() => setIsOpen(false)}
               />
 
               {userProfile.role === "admin" && (
@@ -321,7 +321,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   icon={Shield}
                   label={dict.nav?.admin}
                   variant="amber"
-                  setIsOpen={setIsOpen}
+                  onClose={() => setIsOpen(false)}
                 />
               )}
 

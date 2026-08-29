@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   publisher: 'Sehatak',
   icons: {
     icon: [
+      { url: '/icon.png', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.png', type: 'image/svg+xml' },
     ],
     shortcut: '/favicon.ico',
     apple: '/icon.png',

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Pill } from 'lucide-react';
+import Image from 'next/image';
 
 interface LoginFormProps {
   locale: 'en' | 'ar';
@@ -81,9 +82,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
   return (
     <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-8 shadow-xl">
       <div className="flex flex-col items-center text-center mb-6">
-        <div className="w-12 h-12 rounded-2xl bg-[#008080] text-white flex items-center justify-center shadow-lg mb-3">
-          <Pill className="w-6 h-6" />
-        </div>
+        <Image
+          src="/icon.svg"
+          alt="sehetak"
+          width={64}
+          height={64}
+          className="w-16 h-16 object-contain mb-3"
+          priority
+          draggable={false}
+        />
         <h2 className="text-2xl font-bold text-slate-900">{dict.auth?.welcomeBack}</h2>
         <p className="text-xs text-slate-500 mt-1">{dict.auth?.loginSubtitle}</p>
       </div>

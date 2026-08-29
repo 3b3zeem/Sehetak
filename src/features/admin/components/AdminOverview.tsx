@@ -27,14 +27,14 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({ locale, dict }) =>
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-slate-900 text-white rounded-2xl p-8 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="bg-white border border-slate-200 text-slate-900 rounded-2xl p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2 text-amber-600 text-xs font-bold uppercase tracking-wider mb-2">
             <Shield className="w-4 h-4" />
             <span>Platform Overseer</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold">{dict.admin?.portalTitle}</h1>
-          <p className="text-xs text-slate-400 mt-1">Real-time health telemetry and global medication administration</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">{dict.admin?.portalTitle}</h1>
+          <p className="text-xs text-slate-500 mt-1">Real-time health telemetry and global medication administration</p>
         </div>
       </div>
 

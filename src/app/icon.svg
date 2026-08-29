@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Full Sharp Square White Background -->
+  <rect width="512" height="512" fill="#FFFFFF" />
+
+  <!-- Pill Capsule Emblem with Reversed Orientation (rotate 45) -->
+  <g transform="translate(256, 256) rotate(45)">
+    <!-- Solid Half -->
+    <path d="M -85 15 L -85 95 A 85 85 0 0 0 85 95 L 85 15 Z" fill="#008080" />
+
+    <!-- Outlined Cap with Gap -->
+    <path d="M -85 -15 L -85 -95 A 85 85 0 0 1 85 -95 L 85 -15" fill="none" stroke="#008080" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

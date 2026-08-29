@@ -113,7 +113,7 @@ export const AdminUsers: React.FC<AdminUsersProps> = ({ locale, dict }) => {
                         newRole: u.role === 'admin' ? 'patient' : 'admin',
                       })
                     }
-                    isLoading={toggleRoleMutation.isPending}
+                    isLoading={toggleRoleMutation.isPending && toggleRoleMutation.variables?.userId === u.id}
                     className="gap-1 text-slate-700"
                   >
                     <Shield className="w-3.5 h-3.5 text-amber-600" />

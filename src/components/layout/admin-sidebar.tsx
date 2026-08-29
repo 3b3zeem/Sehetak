@@ -42,14 +42,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ locale, dict }) => {
   ];
 
   return (
-    <aside className="w-full md:w-64 bg-slate-900 text-white rounded-2xl p-6 shadow-xl flex flex-col gap-6">
-      <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+    <aside className="w-full md:w-64 bg-white border border-slate-200 text-slate-900 p-6 shadow-sm flex flex-col gap-6">
+      <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+        <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
           <Shield className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="font-bold text-sm text-white">Admin Control</h3>
-          <span className="text-xs text-amber-400 font-medium">System Overseer</span>
+          <h3 className="font-bold text-sm text-slate-900">Admin Control</h3>
+          <span className="text-xs text-amber-700 font-medium">System Overseer</span>
         </div>
       </div>
 
@@ -68,8 +68,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ locale, dict }) => {
               className={clsx(
                 'flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all',
                 isActive
-                  ? 'bg-[#008080] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
+                  ? 'bg-[#008080] text-white shadow-sm font-bold'
+                  : 'text-slate-600 hover:text-[#008080] hover:bg-slate-50'
               )}
             >
               <Icon className="w-4 h-4" />

@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Pill } from 'lucide-react';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Pill } from "lucide-react";
+import Image from "next/image";
 
 interface RegisterFormProps {
-  locale: 'en' | 'ar';
+  locale: "en" | "ar";
   dict: any;
 }
 
@@ -18,19 +19,35 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
   const router = useRouter();
   const supabase = createClient();
 
-  const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMsg('');
+    setErrorMsg("");
 
-    const formattedUsername = username.trim().toLowerCase().replace(/\s+/g, '_');
+    if (password !== confirmPassword) {
+      const mismatchMsg =
+        dict.auth?.passwordsDoNotMatch ||
+        (locale === "ar"
+          ? "كلمتا المرور غير متطابقتين"
+          : "Passwords do not match");
+      setErrorMsg(mismatchMsg);
+      toast.error(mismatchMsg);
+      setIsLoading(false);
+      return;
+    }
+
+    const formattedUsername = username
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_");
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -53,21 +70,26 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
 
       if (data.user) {
         // Create profile in profiles table
-        await supabase.from('profiles').insert({
+        await supabase.from("profiles").insert({
           id: data.user.id,
           username: formattedUsername,
           full_name: fullName,
           email,
-          role: 'patient',
+          role: "patient",
           locale,
         });
 
-        toast.success(dict.auth?.registerSuccess || 'Account created');
-        router.push(`/${locale}/dashboard/${formattedUsername}`);
+        toast.success(
+          dict.auth?.registerSuccess ||
+            (locale === "ar"
+              ? "تم إنشاء الحساب بنجاح"
+              : "Account created successfully"),
+        );
+        router.push(`/${locale}/login`);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Registration failed');
-      toast.error(err.message || 'Registration failed');
+      setErrorMsg(err.message || "Registration failed");
+      toast.error(err.message || "Registration failed");
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +99,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?locale=${locale}`,
         },
@@ -87,19 +109,29 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
         setIsLoading(false);
       }
     } catch (err: any) {
-      toast.error(err.message || 'Google Sign-In error');
+      toast.error(err.message || "Google Sign-In error");
       setIsLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md bg-[#ffffff] border border-slate-200 rounded-2xl p-8 shadow-xl">
-      <div className="flex flex-col items-center text-center mb-6">
-        <div className="w-12 h-12 rounded-2xl bg-[#008080] text-white flex items-center justify-center shadow-lg mb-3">
-          <Pill className="w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-bold text-slate-900">{dict.auth?.createAccount}</h2>
-        <p className="text-xs text-slate-500 mt-1">{dict.auth?.registerSubtitle}</p>
+      <div className="flex flex-col items-center text-center mb-6 bg-white">
+        <Image
+          src="/icon.svg"
+          alt="sehetak"
+          width={64}
+          height={64}
+          className="w-16 h-16 object-contain mb-3 bg-white"
+          priority
+          draggable={false}
+        />
+        <h2 className="text-2xl font-bold text-slate-900">
+          {dict.auth?.createAccount}
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">
+          {dict.auth?.registerSubtitle}
+        </p>
       </div>
 
       {errorMsg && (
@@ -133,12 +165,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>{locale === 'ar' ? 'التسجيل باستخدام Google' : 'Sign up with Google'}</span>
+        <span>
+          {locale === "ar" ? "التسجيل باستخدام Google" : "Sign up with Google"}
+        </span>
       </button>
 
       <div className="flex items-center my-4">
         <div className="flex-1 border-t border-slate-200"></div>
-        <span className="px-3 text-slate-400 text-xs">{locale === 'ar' ? 'أو' : 'OR'}</span>
+        <span className="px-3 text-slate-400 text-xs">
+          {locale === "ar" ? "أو" : "OR"}
+        </span>
         <div className="flex-1 border-t border-slate-200"></div>
       </div>
 
@@ -177,14 +213,34 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
           placeholder="••••••••"
         />
 
-        <Button type="submit" variant="primary" className="w-full mt-2" isLoading={isLoading}>
+        <Input
+          label={
+            dict.auth?.confirmPasswordLabel ||
+            (locale === "ar" ? "تأكيد كلمة المرور" : "Confirm Password")
+          }
+          type="password"
+          required
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+        />
+
+        <Button
+          type="submit"
+          variant="primary"
+          className="w-full mt-2"
+          isLoading={isLoading}
+        >
           {dict.auth?.submitRegister}
         </Button>
       </form>
 
       <div className="mt-6 text-center text-xs text-slate-600">
         <span>{dict.auth?.haveAccount} </span>
-        <Link href={`/${locale}/login`} className="font-bold text-[#008080] hover:underline">
+        <Link
+          href={`/${locale}/login`}
+          className="font-bold text-[#008080] hover:underline"
+        >
           {dict.auth?.submitLogin}
         </Link>
       </div>

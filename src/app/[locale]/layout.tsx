@@ -1,11 +1,11 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getDictionary, Locale } from '@/lib/i18n';
-import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { CookieConsentBanner } from '@/components/feedback/CookieConsentBanner';
 import { createClient } from '@/lib/supabase/server';
 import { Metadata } from 'next';
+import { Navbar } from '@/components/layout/Navbar/navbar';
 
 export async function generateMetadata({
   params,
@@ -99,7 +99,7 @@ export default async function LocaleLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar locale={currentLocale} dict={dict} userProfile={userProfile} />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 w-full px-4 sm:px-8 py-8">
         {children}
       </main>
       <Footer locale={currentLocale} dict={dict} />

@@ -12,7 +12,7 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ locale, dict }) => {
   return (
     <footer className="w-full bg-slate-900 text-slate-300 border-t border-slate-800 py-12 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="w-full px-4 sm:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-xl font-bold text-white">
             <div className="w-8 h-8 rounded-lg bg-[#008080] text-white flex items-center justify-center">
@@ -49,7 +49,7 @@ export const Footer: React.FC<FooterProps> = ({ locale, dict }) => {
           </p>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
+      <div className="w-full px-4 sm:px-8 mt-10 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
         © {new Date().getFullYear()} {dict.brand?.name}. All rights reserved.
       </div>
     </footer>

@@ -39,10 +39,10 @@ export async function updateSession(request: NextRequest) {
   const segments = pathname.split('/').filter(Boolean);
   const locale = segments[0] === 'ar' || segments[0] === 'en' ? segments[0] : 'en';
 
-  // Check path patterns
-  const isAuthPage = pathname.includes('/login') || pathname.includes('/register');
-  const isDashboardPage = pathname.includes('/dashboard');
-  const isAdminPage = pathname.includes('/dashboard/admin');
+  // Check path patterns strictly using URL segments to prevent infinite redirect loops
+  const isAuthPage = segments[1] === 'login' || segments[1] === 'register';
+  const isDashboardPage = segments[1] === 'dashboard';
+  const isAdminPage = isDashboardPage && segments[2] === 'admin';
 
   if (user) {
     // Fetch profile for role and username

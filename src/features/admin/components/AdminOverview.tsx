@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AdminOverviewStats, ApiResponse } from '@/types';
 import { DashboardSkeleton } from '@/components/feedback/skeletons';
 import { Users, Pill, Activity, BellRing, Shield, Clock } from 'lucide-react';
+import { useAdminOverview } from '../hooks/useAdminOverview';
 
 interface AdminOverviewProps {
   locale: 'en' | 'ar';
@@ -12,15 +11,7 @@ interface AdminOverviewProps {
 }
 
 export const AdminOverview: React.FC<AdminOverviewProps> = ({ locale, dict }) => {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['adminOverview'],
-    queryFn: async (): Promise<AdminOverviewStats> => {
-      const res = await fetch('/api/admin/overview');
-      const json: ApiResponse<AdminOverviewStats> = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to fetch admin stats');
-      return json.data!;
-    },
-  });
+  const { data: stats, isLoading } = useAdminOverview();
 
   if (isLoading) return <DashboardSkeleton />;
 

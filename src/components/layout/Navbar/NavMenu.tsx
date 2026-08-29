@@ -143,11 +143,11 @@ export const NavMenu: React.FC<NavMenuProps> = ({
       <nav
         ref={navRef}
         onMouseLeave={handleMouseLeaveNav}
-        className="relative hidden md:flex items-center p-1"
+        className="relative hidden md:flex items-center p-1 rounded-xl overflow-hidden"
       >
         {/* SVG Gooey Layer Container */}
         <div
-          className="absolute inset-0 pointer-events-none overflow-visible"
+          className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
           style={{ filter: 'url(#gooey-shared-blob-filter)' }}
         >
           {/* Shared Sliding Liquid Blob */}

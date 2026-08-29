@@ -19,7 +19,7 @@ export function useDailyTimeline() {
         queryClient.invalidateQueries({ queryKey: ['medications'] });
         queryClient.invalidateQueries({ queryKey: ['authenticated-home-user'] });
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'dose_logs' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'medication_logs' }, () => {
         queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
@@ -38,10 +38,13 @@ export function useDailyTimeline() {
     staleTime: 0,
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<{ doses: CalculatedDoseItem[]; adherenceScore: number }> => {
-      // Fetch medications & logs for today
+      // Fetch medications
       const resMeds = await fetch('/api/user/medications');
       const jsonMeds: ApiResponse<MedicationRow[]> = await resMeds.json();
       const meds = jsonMeds.data || [];
+
+      // Fetch today's logged doses from Supabase medication_logs table
+      const { data: logs } = await supabase.from('medication_logs').select('*');
 
       // Calculate doses for today
       const todayStr = new Date().toISOString().split('T')[0];
@@ -62,14 +65,24 @@ export function useDailyTimeline() {
           scheduledDate.setHours(scheduledHour, 0, 0, 0);
         }
 
+        const scheduledISO = scheduledDate.toISOString();
+        const matchingLog = logs?.find((l) => {
+          if (l.medication_id !== m.id) return false;
+          const logTime = new Date(l.scheduled_for).getTime();
+          const schedTime = scheduledDate.getTime();
+          return Math.abs(logTime - schedTime) < 60000;
+        });
+
+        const status = matchingLog ? (matchingLog.status as 'taken' | 'skipped' | 'pending') : 'pending';
+
         return {
           id: `computed-${m.id}-${todayStr}`,
           medication_id: m.id,
           medication_name: m.name,
           med_type: m.med_type,
           dosage: m.dosage,
-          scheduled_for: scheduledDate.toISOString(),
-          status: 'pending',
+          scheduled_for: scheduledISO,
+          status,
           stock_count: m.stock_count,
           low_stock_threshold: m.low_stock_threshold,
           notes: m.notes,

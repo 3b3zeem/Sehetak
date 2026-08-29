@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MedicationRow, ApiResponse } from '@/types';
 import { TableSkeleton } from '@/components/feedback/skeletons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Search, Pill, Trash2, Edit3 } from 'lucide-react';
+import { Search, Pill, Trash2 } from 'lucide-react';
+import { useAdminMedications } from '../hooks/useAdminMedications';
 
 interface AdminMedicationsProps {
   locale: 'en' | 'ar';
@@ -15,34 +13,8 @@ interface AdminMedicationsProps {
 }
 
 export const AdminMedications: React.FC<AdminMedicationsProps> = ({ locale, dict }) => {
-  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-
-  const { data: medications, isLoading } = useQuery({
-    queryKey: ['adminMedications', search],
-    queryFn: async (): Promise<(MedicationRow & { profiles?: { username: string; full_name: string } })[]> => {
-      const res = await fetch(`/api/admin/medications?q=${encodeURIComponent(search)}`);
-      const json: ApiResponse<any> = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to fetch global medications');
-      return json.data || [];
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin/medications/${id}`, { method: 'DELETE' });
-      const json: ApiResponse = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to delete');
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminMedications'] });
-      toast.success('Medication deleted by admin');
-    },
-    onError: (err: any) => {
-      toast.error(err.message || 'Delete error');
-    },
-  });
+  const { medications, isLoading, deleteMutation } = useAdminMedications(search);
 
   if (isLoading) return <TableSkeleton />;
 

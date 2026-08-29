@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useDailyTimeline } from "../hooks/useDailyTimeline";
+import { useUpdateBaselineMeals } from "../hooks/useUpdateBaselineMeals";
 import { useMealOffsetStore } from "@/stores/useMealOffsetStore";
 import { CardSkeleton } from "@/components/feedback/skeletons";
 import { Button } from "@/components/ui/button";
@@ -39,23 +40,15 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
   const [lTime, setLTime] = useState(lunchTime);
   const [dTime, setDTime] = useState(dinnerTime);
 
-  const handleSaveMealTimes = async () => {
-    setMealTimes({ breakfastTime: bTime, lunchTime: lTime, dinnerTime: dTime });
+  const updateMealsMutation = useUpdateBaselineMeals(dict.common?.success || "Meal times updated");
 
-    try {
-      await fetch("/api/user/meals/anchor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          breakfast_time: bTime,
-          lunch_time: lTime,
-          dinner_time: dTime,
-        }),
-      });
-      toast.success(dict.common?.success || "Meal times updated");
-    } catch {
-      // client store updated
-    }
+  const handleSaveMealTimes = () => {
+    setMealTimes({ breakfastTime: bTime, lunchTime: lTime, dinnerTime: dTime });
+    updateMealsMutation.mutate({
+      breakfast_time: bTime,
+      lunch_time: lTime,
+      dinner_time: dTime,
+    });
     setIsShiftModalOpen(false);
   };
 

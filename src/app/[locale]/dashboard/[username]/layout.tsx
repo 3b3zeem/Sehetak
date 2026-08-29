@@ -1,6 +1,6 @@
-import React from 'react';
-import { getDictionary, Locale } from '@/lib/i18n';
-import { PatientDashboardTabs } from '@/components/layout/patient-dashboard-tabs';
+import React from "react";
+import { getDictionary, Locale } from "@/lib/i18n";
+import { PatientDashboardTabs } from "@/components/layout/patient-dashboard-tabs";
 
 export default async function PatientDashboardLayout({
   children,
@@ -16,7 +16,11 @@ export default async function PatientDashboardLayout({
   return (
     <div className="space-y-6 py-4">
       {/* Dynamic Tab Navigation Bar */}
-      <PatientDashboardTabs locale={currentLocale} username={username} dict={dict} />
+      <PatientDashboardTabs
+        locale={currentLocale}
+        username={username}
+        dict={dict}
+      />
 
       {/* Main Tab View Content */}
       <div>{children}</div>

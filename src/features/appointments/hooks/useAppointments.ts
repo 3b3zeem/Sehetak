@@ -37,10 +37,50 @@ export function useAppointments() {
     },
   });
 
+  const updateAppointmentMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<DoctorAppointmentRow> }) => {
+      const res = await fetch(`/api/user/appointments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json: ApiResponse<DoctorAppointmentRow> = await res.json();
+      if (!json.success) throw new Error(json.message || 'Failed to update appointment');
+      return json.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Appointment updated successfully');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Error updating appointment');
+    },
+  });
+
+  const deleteAppointmentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/user/appointments/${id}`, { method: 'DELETE' });
+      const json: ApiResponse = await res.json();
+      if (!json.success) throw new Error(json.message || 'Failed to delete appointment');
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Appointment deleted successfully');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Error deleting appointment');
+    },
+  });
+
   return {
     appointments: appointmentsQuery.data || [],
     isLoading: appointmentsQuery.isLoading,
     addAppointment: addAppointmentMutation.mutateAsync,
+    updateAppointment: updateAppointmentMutation.mutateAsync,
+    deleteAppointment: deleteAppointmentMutation.mutateAsync,
     isAdding: addAppointmentMutation.isPending,
+    isUpdating: updateAppointmentMutation.isPending,
+    isDeleting: deleteAppointmentMutation.isPending,
   };
 }

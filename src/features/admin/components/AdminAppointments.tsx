@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { DoctorAppointmentRow, ApiResponse } from '@/types';
 import { TableSkeleton } from '@/components/feedback/skeletons';
-import { Calendar, User, Clock } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { useAdminAppointments } from '../hooks/useAdminAppointments';
 
 interface AdminAppointmentsProps {
   locale: 'en' | 'ar';
@@ -12,15 +11,7 @@ interface AdminAppointmentsProps {
 }
 
 export const AdminAppointments: React.FC<AdminAppointmentsProps> = ({ locale, dict }) => {
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ['adminAppointments'],
-    queryFn: async (): Promise<(DoctorAppointmentRow & { profiles?: { username: string; full_name: string } })[]> => {
-      const res = await fetch('/api/admin/appointments');
-      const json: ApiResponse<any> = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to fetch appointments');
-      return json.data || [];
-    },
-  });
+  const { appointments, isLoading } = useAdminAppointments();
 
   if (isLoading) return <TableSkeleton />;
 
@@ -62,7 +53,7 @@ export const AdminAppointments: React.FC<AdminAppointmentsProps> = ({ locale, di
                 <td className="p-4 text-slate-600">
                   {appt.clinic_name || 'N/A'} {appt.clinic_location ? `(${appt.clinic_location})` : ''}
                 </td>
-                <td className="p-4 text-slate-600 font-semibold">
+                <td className="p-4 text-[#008080] font-semibold">
                   {new Date(appt.appointment_date).toLocaleString()}
                 </td>
                 <td className="p-4">

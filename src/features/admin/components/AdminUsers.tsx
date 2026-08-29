@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ProfileRow, ApiResponse } from '@/types';
 import { TableSkeleton } from '@/components/feedback/skeletons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { Search, Shield, Users } from 'lucide-react';
+import { useAdminUsers } from '../hooks/useAdminUsers';
 
 interface AdminUsersProps {
   locale: 'en' | 'ar';
@@ -15,38 +13,8 @@ interface AdminUsersProps {
 }
 
 export const AdminUsers: React.FC<AdminUsersProps> = ({ locale, dict }) => {
-  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-
-  const { data: users, isLoading } = useQuery({
-    queryKey: ['adminUsers', search],
-    queryFn: async (): Promise<ProfileRow[]> => {
-      const res = await fetch(`/api/admin/users?q=${encodeURIComponent(search)}`);
-      const json: ApiResponse<ProfileRow[]> = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to fetch users');
-      return json.data || [];
-    },
-  });
-
-  const toggleRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'patient' | 'admin' }) => {
-      const res = await fetch('/api/admin/users', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, role: newRole }),
-      });
-      const json: ApiResponse = await res.json();
-      if (!json.success) throw new Error(json.message || 'Failed to update role');
-      return json.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
-      toast.success('User role updated successfully');
-    },
-    onError: (err: any) => {
-      toast.error(err.message || 'Role update error');
-    },
-  });
+  const { users, isLoading, toggleRoleMutation } = useAdminUsers(search);
 
   if (isLoading) return <TableSkeleton />;
 

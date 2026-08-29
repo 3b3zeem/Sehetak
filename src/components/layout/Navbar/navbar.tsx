@@ -151,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 shadow-sm"
+      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 shadow-sm overflow-x-clip"
     >
       <div className="px-4 sm:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo: logo.svg containing Icon on Left & Text on Right */}

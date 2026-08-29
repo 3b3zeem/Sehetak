@@ -1,37 +1,47 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import { useMedications } from '../hooks/useMedications';
-import { Pill, Clock, AlertTriangle, ArrowRight, ArrowLeft } from 'lucide-react';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { useMedications } from "../hooks/useMedications";
+import {
+  Pill,
+  Clock,
+  AlertTriangle,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
 
 interface WizardProps {
-  locale: 'en' | 'ar';
+  locale: "en" | "ar";
   dict: any;
   username: string;
 }
 
-export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username }) => {
+export const MedicationWizard: React.FC<WizardProps> = ({
+  locale,
+  dict,
+  username,
+}) => {
   const router = useRouter();
   const { addMedication, isAdding } = useMedications();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Form State
-  const [name, setName] = useState('');
-  const [medType, setMedType] = useState('pill');
-  const [dosage, setDosage] = useState('');
-  const [frequencyMode, setFrequencyMode] = useState('interval');
-  const [intervalHours, setIntervalHours] = useState('8');
-  const [startTime, setStartTime] = useState('08:00');
-  const [mealAnchor, setMealAnchor] = useState('breakfast');
-  const [mealOffsetMinutes, setMealOffsetMinutes] = useState('30');
-  const [stockCount, setStockCount] = useState('20');
-  const [lowStockThreshold, setLowStockThreshold] = useState('5');
-  const [notes, setNotes] = useState('');
+  const [name, setName] = useState("");
+  const [medType, setMedType] = useState("pill");
+  const [dosage, setDosage] = useState("");
+  const [frequencyMode, setFrequencyMode] = useState("interval");
+  const [intervalHours, setIntervalHours] = useState("8");
+  const [startTime, setStartTime] = useState("08:00");
+  const [mealAnchor, setMealAnchor] = useState("breakfast");
+  const [mealOffsetMinutes, setMealOffsetMinutes] = useState("30");
+  const [stockCount, setStockCount] = useState("20");
+  const [lowStockThreshold, setLowStockThreshold] = useState("5");
+  const [notes, setNotes] = useState("");
 
   const handleNext = () => {
     if (step === 1 && (!name.trim() || !dosage.trim())) return;
@@ -49,9 +59,10 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
       med_type: medType as any,
       dosage,
       frequency_mode: frequencyMode as any,
-      interval_hours: frequencyMode === 'interval' ? parseInt(intervalHours, 10) : null,
+      interval_hours:
+        frequencyMode === "interval" ? parseInt(intervalHours, 10) : null,
       start_time: startTime,
-      meal_anchor: frequencyMode === 'meal_anchored' ? mealAnchor : null,
+      meal_anchor: frequencyMode === "meal_anchored" ? mealAnchor : null,
       meal_offset_minutes: parseInt(mealOffsetMinutes, 10),
       stock_count: parseInt(stockCount, 10),
       low_stock_threshold: parseInt(lowStockThreshold, 10),
@@ -60,31 +71,49 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
     router.push(`/${locale}/dashboard/${username}/medications`);
   };
 
-  const isRtl = locale === 'ar';
+  const isRtl = locale === "ar";
 
   return (
     <div className="max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl p-8 shadow-xl">
       {/* Wizard Progress Bar */}
       <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
-        <div className={`flex items-center gap-2 ${step >= 1 ? 'text-[#008080] font-bold' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? 'bg-[#008080] text-white' : 'bg-slate-100 text-slate-500'}`}>
+        <div
+          className={`flex items-center gap-2 ${step >= 1 ? "text-[#008080] font-bold" : "text-slate-400"}`}
+        >
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? "bg-[#008080] text-white" : "bg-slate-100 text-slate-500"}`}
+          >
             1
           </div>
-          <span className="text-xs hidden sm:inline">{dict.medications?.wizard?.step1}</span>
+          <span className="text-xs hidden sm:inline">
+            {dict.medications?.wizard?.step1}
+          </span>
         </div>
         <div className="w-12 h-0.5 bg-slate-200"></div>
-        <div className={`flex items-center gap-2 ${step >= 2 ? 'text-[#008080] font-bold' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? 'bg-[#008080] text-white' : 'bg-slate-100 text-slate-500'}`}>
+        <div
+          className={`flex items-center gap-2 ${step >= 2 ? "text-[#008080] font-bold" : "text-slate-400"}`}
+        >
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? "bg-[#008080] text-white" : "bg-slate-100 text-slate-500"}`}
+          >
             2
           </div>
-          <span className="text-xs hidden sm:inline">{dict.medications?.wizard?.step2}</span>
+          <span className="text-xs hidden sm:inline">
+            {dict.medications?.wizard?.step2}
+          </span>
         </div>
         <div className="w-12 h-0.5 bg-slate-200"></div>
-        <div className={`flex items-center gap-2 ${step >= 3 ? 'text-[#008080] font-bold' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 3 ? 'bg-[#008080] text-white' : 'bg-slate-100 text-slate-500'}`}>
+        <div
+          className={`flex items-center gap-2 ${step >= 3 ? "text-[#008080] font-bold" : "text-slate-400"}`}
+        >
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step >= 3 ? "bg-[#008080] text-white" : "bg-slate-100 text-slate-500"}`}
+          >
             3
           </div>
-          <span className="text-xs hidden sm:inline">{dict.medications?.wizard?.step3}</span>
+          <span className="text-xs hidden sm:inline">
+            {dict.medications?.wizard?.step3}
+          </span>
         </div>
       </div>
 
@@ -110,12 +139,30 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
               value={medType}
               onChange={(e) => setMedType(e.target.value)}
               options={[
-                { value: 'pill', label: dict.medications?.types?.pill || 'Pill / Tablet' },
-                { value: 'syrup', label: dict.medications?.types?.syrup || 'Syrup' },
-                { value: 'injection', label: dict.medications?.types?.injection || 'Injection' },
-                { value: 'drops', label: dict.medications?.types?.drops || 'Drops' },
-                { value: 'inhaler', label: dict.medications?.types?.inhaler || 'Inhaler' },
-                { value: 'ointment', label: dict.medications?.types?.ointment || 'Ointment' },
+                {
+                  value: "pill",
+                  label: dict.medications?.types?.pill || "Pill / Tablet",
+                },
+                {
+                  value: "syrup",
+                  label: dict.medications?.types?.syrup || "Syrup",
+                },
+                {
+                  value: "injection",
+                  label: dict.medications?.types?.injection || "Injection",
+                },
+                {
+                  value: "drops",
+                  label: dict.medications?.types?.drops || "Drops",
+                },
+                {
+                  value: "inhaler",
+                  label: dict.medications?.types?.inhaler || "Inhaler",
+                },
+                {
+                  value: "ointment",
+                  label: dict.medications?.types?.ointment || "Ointment",
+                },
               ]}
             />
 
@@ -142,13 +189,25 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
               value={frequencyMode}
               onChange={(e) => setFrequencyMode(e.target.value)}
               options={[
-                { value: 'interval', label: dict.medications?.modes?.interval || 'Every X Hours' },
-                { value: 'meal_anchored', label: dict.medications?.modes?.meal_anchored || 'Meal-Anchored' },
-                { value: 'custom_times', label: dict.medications?.modes?.custom_times || 'Fixed Specific Time' },
+                {
+                  value: "interval",
+                  label: dict.medications?.modes?.interval || "Every X Hours",
+                },
+                {
+                  value: "meal_anchored",
+                  label:
+                    dict.medications?.modes?.meal_anchored || "Meal-Anchored",
+                },
+                {
+                  value: "custom_times",
+                  label:
+                    dict.medications?.modes?.custom_times ||
+                    "Fixed Specific Time",
+                },
               ]}
             />
 
-            {frequencyMode === 'interval' && (
+            {frequencyMode === "interval" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label={dict.medications?.wizard?.intervalLabel}
@@ -167,16 +226,22 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
               </div>
             )}
 
-            {frequencyMode === 'meal_anchored' && (
+            {frequencyMode === "meal_anchored" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
                   label={dict.medications?.wizard?.mealAnchorLabel}
                   value={mealAnchor}
                   onChange={(e) => setMealAnchor(e.target.value)}
                   options={[
-                    { value: 'breakfast', label: dict.dashboard?.breakfast || 'Breakfast' },
-                    { value: 'lunch', label: dict.dashboard?.lunch || 'Lunch' },
-                    { value: 'dinner', label: dict.dashboard?.dinner || 'Dinner' },
+                    {
+                      value: "breakfast",
+                      label: dict.dashboard?.breakfast || "Breakfast",
+                    },
+                    { value: "lunch", label: dict.dashboard?.lunch || "Lunch" },
+                    {
+                      value: "dinner",
+                      label: dict.dashboard?.dinner || "Dinner",
+                    },
                   ]}
                 />
                 <Input
@@ -189,7 +254,7 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
               </div>
             )}
 
-            {frequencyMode === 'custom_times' && (
+            {frequencyMode === "custom_times" && (
               <Input
                 label={dict.medications?.wizard?.startTimeLabel}
                 type="time"
@@ -243,8 +308,17 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
         {/* Wizard Controls */}
         <div className="flex items-center justify-between pt-6 border-t border-slate-100">
           {step > 1 ? (
-            <Button type="button" variant="outline" onClick={handlePrev} className="gap-2">
-              {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handlePrev}
+              className="gap-2"
+            >
+              {isRtl ? (
+                <ArrowRight className="w-4 h-4" />
+              ) : (
+                <ArrowLeft className="w-4 h-4" />
+              )}
               <span>{dict.medications?.wizard?.prevStep}</span>
             </Button>
           ) : (
@@ -260,7 +334,11 @@ export const MedicationWizard: React.FC<WizardProps> = ({ locale, dict, username
               className="gap-2"
             >
               <span>{dict.medications?.wizard?.nextStep}</span>
-              {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+              {isRtl ? (
+                <ArrowLeft className="w-4 h-4" />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}
             </Button>
           ) : (
             <Button type="submit" variant="primary" isLoading={isAdding}>

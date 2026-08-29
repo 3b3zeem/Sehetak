@@ -64,10 +64,10 @@ export const PatientDashboardTabs: React.FC<PatientDashboardTabsProps> = ({
             <Link
               key={tab.id}
               href={tab.href}
-              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border ${
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all border outline-none focus-visible:ring-2 focus-visible:ring-[#008080] ${
                 isActive
-                  ? 'bg-[#008080] text-white border-[#008080]'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-[#008080]'
+                  ? "bg-[#008080] text-white border-[#008080]"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-[#008080]"
               }`}
             >
               <Icon className="w-4 h-4" />

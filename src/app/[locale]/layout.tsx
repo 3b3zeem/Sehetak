@@ -93,7 +93,7 @@ export default async function LocaleLayout({
   };
 
   return (
-    <div lang={currentLocale} dir={currentLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen flex flex-col">
+    <div lang={currentLocale} dir={currentLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen flex flex-col overflow-x-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -25,15 +25,25 @@ export const NotificationShowcaseSection: React.FC<
   const isAr = locale === "ar";
   const supabase = createClient();
 
-  const { data: userId } = useQuery({
-    queryKey: ["showcase-user-id"],
+  const { data: userProfile } = useQuery({
+    queryKey: ["showcase-user-profile"],
     queryFn: async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      return user?.id || null;
+      if (!user) return null;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .eq("id", user.id)
+        .single();
+
+      return profile || { id: user.id, username: user.id };
     },
   });
+
+  const userId = userProfile?.id || null;
 
   const botUsername =
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME ||
@@ -179,15 +189,27 @@ export const NotificationShowcaseSection: React.FC<
               </ul>
             </div>
 
-            <Link href={`/${locale}/login`} className="pt-2">
-              <Button variant="primary" className="w-full font-bold gap-2">
-                <Bell className="w-4 h-4" />
-                <span>
-                  {isAr ? "تسجيل الدخول والتفعيل" : "Log In & Activate"}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            {userProfile ? (
+              <Link href={`/${locale}/dashboard/${userProfile.username}/settings`} className="pt-2">
+                <Button variant="primary" className="w-full font-bold gap-2">
+                  <Bell className="w-4 h-4" />
+                  <span>
+                    {isAr ? "الانتقال للإعدادات والتفعيل" : "Go to Settings & Activate"}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href={`/${locale}/login`} className="pt-2">
+                <Button variant="primary" className="w-full font-bold gap-2">
+                  <Bell className="w-4 h-4" />
+                  <span>
+                    {isAr ? "تسجيل الدخول والتفعيل" : "Log In & Activate"}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            )}
           </div>
         </FadeInView>
       </div>

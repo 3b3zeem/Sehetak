@@ -50,6 +50,7 @@ export function useLogin(locale: "en" | "ar", dict: any) {
         } else {
           router.push(`/${locale}/dashboard/${res.data.username}`);
         }
+        router.refresh();
       } else {
         toast.error(res.message || "Login failed");
       }

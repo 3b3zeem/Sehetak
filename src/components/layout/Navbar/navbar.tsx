@@ -41,6 +41,52 @@ export const Navbar: React.FC<NavbarProps> = ({
   const router = useRouter();
   const supabase = createClient();
 
+  const [profile, setProfile] = useState<{
+    username: string;
+    role: "patient" | "admin";
+  } | null>(userProfile || null);
+
+  useEffect(() => {
+    setProfile(userProfile || null);
+  }, [userProfile]);
+
+  useEffect(() => {
+    const fetchProfile = async (userId: string, email?: string) => {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("username, role")
+        .eq("id", userId)
+        .single();
+
+      setProfile({
+        username: prof?.username || email?.split("@")[0] || "patient",
+        role: (prof?.role as "patient" | "admin") || "patient",
+      });
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user.email);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user.email);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const [isOpen, setIsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -127,25 +173,31 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const toggleLanguage = () => {
     const nextLocale = locale === "en" ? "ar" : "en";
-    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
-    router.push(newPath || `/${nextLocale}`);
+    if (pathname.startsWith(`/${locale}`)) {
+      const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`);
+      router.push(newPath || `/${nextLocale}`);
+    } else {
+      router.push(`/${nextLocale}`);
+    }
   };
 
   const handleLogout = async () => {
     setIsOpen(false);
+    setProfile(null);
     await supabase.auth.signOut();
     toast.success(
       locale === "ar" ? "تم تسجيل الخروج بنجاح" : "Signed out successfully",
     );
     router.push(`/${locale}/login`);
+    router.refresh();
   };
 
-  const dashboardPath = userProfile
-    ? `/${locale}/dashboard/${userProfile.username}`
+  const dashboardPath = profile
+    ? `/${locale}/dashboard/${profile.username}`
     : `/${locale}/login`;
 
-  const shortName = userProfile?.username
-    ? userProfile.username.split('_')[0]
+  const shortName = profile?.username
+    ? profile.username.split('_')[0]
     : 'Profile';
 
   return (
@@ -171,7 +223,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <NavMenu
           locale={locale}
           dict={dict}
-          userProfile={userProfile}
+          userProfile={profile}
           dashboardPath={dashboardPath}
         />
 
@@ -189,7 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Desktop User Actions */}
           <div className="hidden md:flex items-center gap-2">
-            {userProfile ? (
+            {profile ? (
               <>
                 <Link href={`${dashboardPath}/settings`}>
                   <button
@@ -271,7 +323,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClose={() => setIsOpen(false)}
           />
 
-          {userProfile ? (
+          {profile ? (
             <>
               <div className="pt-2 pb-1 text-xs font-extrabold uppercase tracking-wider text-slate-400">
                 {locale === "ar" ? "القائمة الشخصية" : "Personal Menu"}
@@ -312,7 +364,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClose={() => setIsOpen(false)}
               />
 
-              {userProfile.role === "admin" && (
+              {profile.role === "admin" && (
                 <MobileLink
                   href={`/${locale}/dashboard/admin`}
                   icon={Shield}

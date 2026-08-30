@@ -14,9 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const isAr = locale === 'ar';
-  const siteUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://go-sehetak.vercel.app');
+  const siteUrl = 'https://go-sehetak.vercel.app';
 
   const title = isAr
     ? 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والمواعيد'

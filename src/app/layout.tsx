@@ -45,17 +45,10 @@ export const metadata: Metadata = {
     url: siteUrl,
     images: [
       {
-        url: '/og-image.png',
+        url: `${siteUrl}/og-image.png`,
         width: 1200,
         height: 630,
         alt: 'Sehetak Social Preview Card',
-        type: 'image/png',
-      },
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Sehetak Logo Banner',
         type: 'image/png',
       },
     ],
@@ -67,7 +60,7 @@ export const metadata: Metadata = {
     title: 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
     description:
       'متابعة وجدولة الجرعات العلاجية والتنبيهات المباشرة عبر التليجرام وإشعارات المتصفح لراحتك وصحتك.',
-    images: ['/og-image.png'],
+    images: [`${siteUrl}/og-image.png`],
   },
   robots: {
     index: true,

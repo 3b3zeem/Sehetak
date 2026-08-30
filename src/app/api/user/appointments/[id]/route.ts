@@ -43,6 +43,7 @@ export async function PUT(
         remind_before_minutes: parseInt(remind_before_minutes, 10) || 30,
         notes,
         report_url,
+        notification_sent: false,
       })
       .eq('id', id)
       .eq('user_id', user.id)

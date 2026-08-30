@@ -24,6 +24,7 @@ import {
   Utensils,
   Award,
 } from "lucide-react";
+import { CountdownBadge } from "@/components/ui/CountdownBadge";
 
 interface TimelineProps {
   locale: "en" | "ar";
@@ -132,9 +133,14 @@ export const DailyTimeline: React.FC<TimelineProps> = ({ locale, dict }) => {
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-slate-100 text-slate-700 font-semibold text-xs shrink-0 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>{timeStr}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="p-2 bg-slate-100 text-slate-700 font-semibold text-xs shrink-0 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{timeStr}</span>
+                      </div>
+                      {!isTaken && !isSkipped && (
+                        <CountdownBadge targetDate={d.scheduled_for} locale={locale} type="medication" />
+                      )}
                     </div>
                     <div>
                       <h4 className="font-bold text-sm">{d.medication_name}</h4>

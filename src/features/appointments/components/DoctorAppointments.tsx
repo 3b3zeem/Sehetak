@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { Calendar, Plus, MapPin, User, Upload, Clock, Edit3, Trash2, Bell, FileText, CheckCircle2, X, ExternalLink, Loader2, Eye, Image as ImageIcon } from 'lucide-react';
 import { DoctorAppointmentRow } from '@/types';
 import { toast } from 'sonner';
+import { CountdownBadge } from '@/components/ui/CountdownBadge';
 
 interface AppointmentsProps {
   locale: 'en' | 'ar';
@@ -226,9 +227,12 @@ export const DoctorAppointments: React.FC<AppointmentsProps> = ({ locale, dict }
                   </div>
 
                   <div className="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
-                    <div className="flex items-center gap-2 text-slate-700 font-semibold">
-                      <Clock className="w-4 h-4 text-[#008080]" />
-                      <span>{dateStr} at {timeStr}</span>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2 text-slate-700 font-semibold">
+                        <Clock className="w-4 h-4 text-[#008080]" />
+                        <span>{dateStr} at {timeStr}</span>
+                      </div>
+                      <CountdownBadge targetDate={appt.appointment_date} locale={locale} type="appointment" />
                     </div>
 
                     {/* Reminder Badge */}

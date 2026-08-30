@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
         remind_before_minutes: parseInt(remind_before_minutes, 10) || 30,
         notes,
         report_url,
+        notification_sent: false,
       })
       .select()
       .single();

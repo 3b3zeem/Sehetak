@@ -1,6 +1,6 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    console.log('[Sehatak Cron Engine] Starting automatic 45-second background reminder ticker...');
+    console.log('[Sehetak Cron Engine] Starting automatic 45-second background reminder ticker...');
 
     // Run immediately on boot
     triggerCron();

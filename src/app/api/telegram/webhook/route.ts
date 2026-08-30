@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 chat_id: chatId,
-                text: 'Your Sehatak (صحتك) account has been successfully linked! You will now receive automated medication reminders right here.',
+                text: 'Your Sehetak (صحتك) account has been successfully linked! You will now receive automated medication reminders right here.',
               }),
             });
           }

@@ -97,7 +97,7 @@ export async function GET() {
                   JSON.stringify({
                     title: isAr
                       ? "صحتك - تذكير الدواء"
-                      : "Sehatak Medication Reminder",
+                      : "Sehetak Medication Reminder",
                     body: msgText,
                     icon: "/icon.png",
                     url: "/",

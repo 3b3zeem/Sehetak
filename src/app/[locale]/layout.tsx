@@ -14,31 +14,50 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const isAr = locale === 'ar';
+  const siteUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://go-sehetak.vercel.app');
+
+  const title = isAr
+    ? 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والمواعيد'
+    : 'Sehetak - Smart Medication & Health Companion';
+  const description = isAr
+    ? 'تابع جدول أدوية اليوم والتذكيرات المباشرة عبر التليجرام وإشعارات المتصفح لتنظيم حياتك وصحتك.'
+    : 'Track your daily medications, receive automated Telegram & browser reminders, and manage doctor appointments effortlessly.';
 
   return {
-    title: isAr
-      ? 'Sehatak - صحتك | المنصة الذكية لإدارة الأدوية والمواعيد'
-      : 'Sehatak - Smart Medication & Health Companion',
-    description: isAr
-      ? 'تابع جدول أدوية اليوم والتذكيرات المباشرة عبر التليجرام وإشعارات المتصفح لتنظيم حياتك وصحتك.'
-      : 'Track your daily medications, receive automated Telegram & browser reminders, and manage doctor appointments effortlessly.',
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
     alternates: {
-      canonical: `/${locale}`,
+      canonical: `${siteUrl}/${locale}`,
       languages: {
-        ar: '/ar',
-        en: '/en',
+        ar: `${siteUrl}/ar`,
+        en: `${siteUrl}/en`,
       },
     },
     openGraph: {
-      title: isAr ? 'sehetak - صحتك' : 'sehetak Medical Platform',
-      description: isAr
-        ? 'المنصة الذكية لإدارة الأدوية والمواعيد الطبية والتنبيهات المباشرة'
-        : 'Smart meal-anchored medication companion with instant Telegram bot reminders.',
-      url: `/${locale}`,
-      siteName: 'sehetak',
-      images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
+      title,
+      description,
+      url: `${siteUrl}/${locale}`,
+      siteName: 'Sehetak - صحتك',
+      images: [
+        {
+          url: `${siteUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: 'Sehetak OpenGraph Banner',
+          type: 'image/png',
+        },
+      ],
       locale: isAr ? 'ar_EG' : 'en_US',
       type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${siteUrl}/og-image.png`],
     },
   };
 }
@@ -82,7 +101,7 @@ export default async function LocaleLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MedicalWebPage',
-    name: currentLocale === 'ar' ? 'صحتك - Sehatak' : 'Sehatak Medical App',
+    name: currentLocale === 'ar' ? 'صحتك - Sehetak' : 'Sehetak Medical App',
     description:
       currentLocale === 'ar'
         ? 'منصة ذكية لإدارة الأدوية والتذكير التلقائي بمواعيد الجرعات'

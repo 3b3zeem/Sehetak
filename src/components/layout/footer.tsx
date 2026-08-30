@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ locale, dict }) => {
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold text-white mb-4">Sehatak SaaS</h4>
+          <h4 className="text-sm font-semibold text-white mb-4">Sehetak SaaS</h4>
           <p className="text-xs text-slate-400">
             Medical Compliance Platform with Meal-Anchored Scheduling & Telegram Bot Sync.
           </p>

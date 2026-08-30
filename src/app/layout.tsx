@@ -3,17 +3,19 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 import { Metadata } from 'next';
 
+const siteUrl = 'https://go-sehetak.vercel.app';
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sehetak.app'),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
-    template: '%s | sehetak - صحتك',
+    default: 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
+    template: '%s | Sehetak - صحتك',
   },
   description:
     'صحتك هي منصة رعاية صحية ذكية تتيح لك متابعة جدول أدوية اليوم، التذكير المباشر عبر تليجرام وإشعارات المتصفح، وتنظيم المواعيد الطبية لضمان الالتزام العلاجي.',
   keywords: [
     'صحتك',
-    'Sehatak',
+    'Sehetak',
     'تذكير الأدوية',
     'جدول الجرعات',
     'تليجرام بوت',
@@ -23,9 +25,9 @@ export const metadata: Metadata = {
     'Medication Companion',
     'Medical Scheduler',
   ],
-  authors: [{ name: 'Sehatak Team' }],
-  creator: 'Sehatak',
-  publisher: 'Sehatak',
+  authors: [{ name: 'Sehetak Team' }],
+  creator: 'Sehetak',
+  publisher: 'Sehetak',
   icons: {
     icon: [
       { url: '/icon.png', type: 'image/png' },
@@ -36,16 +38,25 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
+    title: 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
     description:
       'متابعة وجدولة الجرعات العلاجية والتنبيهات المباشرة عبر التليجرام وإشعارات المتصفح لراحتك وصحتك.',
-    siteName: 'sehetak - صحتك',
+    siteName: 'Sehetak - صحتك',
+    url: siteUrl,
     images: [
       {
-        url: '/og-image.svg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'sehetak Social Preview Card',
+        alt: 'Sehetak Social Preview Card',
+        type: 'image/png',
+      },
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Sehetak Logo Banner',
+        type: 'image/png',
       },
     ],
     locale: 'ar_EG',
@@ -53,10 +64,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
+    title: 'Sehetak - صحتك | المنصة الذكية لإدارة الأدوية والتذكيرات الطبية',
     description:
       'متابعة وجدولة الجرعات العلاجية والتنبيهات المباشرة عبر التليجرام وإشعارات المتصفح لراحتك وصحتك.',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,

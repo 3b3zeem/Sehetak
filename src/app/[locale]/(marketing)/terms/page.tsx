@@ -15,7 +15,7 @@ export default async function TermsPage({
       <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-4 text-xs text-slate-600 leading-relaxed">
         <h3 className="text-sm font-bold text-slate-800">1. Medical Assistant Disclaimer</h3>
         <p>
-          Sehatak is a software digital reminder assistant. It does not provide medical diagnosis, treatment recommendations, or replace professional healthcare provider advice.
+          Sehetak is a software digital reminder assistant. It does not provide medical diagnosis, treatment recommendations, or replace professional healthcare provider advice.
         </p>
 
         <h3 className="text-sm font-bold text-slate-800">2. User Responsibilities</h3>

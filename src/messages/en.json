@@ -131,7 +131,7 @@
     "pushActive": "Web Push Notifications Active"
   },
   "admin": {
-    "portalTitle": "Sehatak Admin Oversight Portal",
+    "portalTitle": "Sehetak Admin Oversight Portal",
     "overview": "Overview Dashboard",
     "users": "User Directory",
     "medications": "Global Medication Catalog",
@@ -160,7 +160,7 @@
   },
   "marketing": {
     "heroTitle": "Never Miss a Dose. Take Control of Your Health.",
-    "heroSubtitle": "Sehatak bridges smart meal-anchored schedules, automated Web Push, and instant Telegram reminders in a clean bilingual experience.",
+    "heroSubtitle": "Sehetak bridges smart meal-anchored schedules, automated Web Push, and instant Telegram reminders in a clean bilingual experience.",
     "ctaStart": "Get Started Free",
     "ctaLearn": "Learn More",
     "featuresTitle": "Designed for Complete Adherence",
@@ -170,7 +170,7 @@
     "feature2Desc": "Native RTL Arabic and LTR English support built specifically for Arab world patients.",
     "feature3Title": "Instant Telegram Sync",
     "feature3Desc": "1-click integration with our Telegram bot for seamless reminders anywhere.",
-    "aboutTitle": "About Sehatak",
+    "aboutTitle": "About Sehetak",
     "aboutDesc": "We are dedicated to improving medication compliance and empowering patients with intuitive digital health tools.",
     "contactTitle": "Get In Touch",
     "contactDesc": "Have questions or need assistance? Reach out to our medical tech support team.",

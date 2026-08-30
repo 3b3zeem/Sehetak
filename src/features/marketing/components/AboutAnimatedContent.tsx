@@ -97,7 +97,7 @@ export const AboutAnimatedContent: React.FC<AboutAnimatedContentProps> = ({ dict
           <HeartPulse className="w-8 h-8" />
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          {dict.marketing?.aboutTitle || 'About Sehatak'}
+          {dict.marketing?.aboutTitle || 'About Sehetak'}
         </h1>
         <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
           {dict.marketing?.aboutDesc ||
@@ -141,7 +141,7 @@ export const AboutAnimatedContent: React.FC<AboutAnimatedContentProps> = ({ dict
           </div>
           <h3 className="text-lg font-bold text-slate-900">Adherence Excellence</h3>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            By anchoring medications around daily meal times and sending multi-channel reminders, Sehatak dramatically improves chronic condition management.
+            By anchoring medications around daily meal times and sending multi-channel reminders, Sehetak dramatically improves chronic condition management.
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-[#0077b6]">
             <Sparkles className="w-4 h-4" />

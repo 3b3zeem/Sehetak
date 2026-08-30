@@ -58,7 +58,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
   const botUsername =
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME ||
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ||
-    "SehatakMed_bot";
+    "SehetakMed_bot";
 
   // Logged-in view: Render REAL live user DailyTimeline with Telegram notice banner
   if (userProfile) {

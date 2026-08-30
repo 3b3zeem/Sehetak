@@ -18,7 +18,7 @@ export const TelegramConnectCard: React.FC<TelegramCardProps> = ({
   const botUsername =
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME ||
     process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ||
-    'SehatakMed_bot';
+    'SehetakMed_bot';
 
   const telegramDeepLink = `https://t.me/${botUsername}?start=${userId}`;
 

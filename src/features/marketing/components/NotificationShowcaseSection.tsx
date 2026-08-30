@@ -32,7 +32,7 @@ export const NotificationShowcaseSection: React.FC<
       <div className="text-center max-w-3xl mx-auto space-y-4 relative z-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#008080]/10 text-[#008080] text-xs font-bold border border-[#008080]/20">
           <Zap className="w-4 h-4" />
-          <span>{isAr ? "الميزة الأهم في صحتك" : "Sehatak Core Feature"}</span>
+          <span>{isAr ? "الميزة الأهم في صحتك" : "Sehetak Core Feature"}</span>
         </div>
 
         <AnimatedTitle
@@ -73,7 +73,7 @@ export const NotificationShowcaseSection: React.FC<
               <p className="text-xs text-slate-600 leading-relaxed">
                 {isAr
                   ? "اشترك في بوت تليجرام صحتك بنقرة واحدة بدون كتابة أو إدخال بيانات. تصلك رسالة تنبيهية باسم الدواء والجرعة وميعاد الدكتور فوراً على تطبيق تليجرام."
-                  : "Connect to Sehatak Telegram Bot with one click. Get instant chat messages containing your medication names, dosage amounts, and doctor appointments."}
+                  : "Connect to Sehetak Telegram Bot with one click. Get instant chat messages containing your medication names, dosage amounts, and doctor appointments."}
               </p>
 
               <ul className="space-y-2 text-xs text-slate-600 border-t border-slate-200 pt-4">
@@ -97,7 +97,7 @@ export const NotificationShowcaseSection: React.FC<
             </div>
 
             <a
-              href="https://t.me/SehatakMed_bot"
+              href="https://t.me/SehetakMed_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="pt-2"

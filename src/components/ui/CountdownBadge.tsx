@@ -39,8 +39,8 @@ export const CountdownBadge: React.FC<CountdownBadgeProps> = ({
       const diff = target - now;
 
       if (diff <= 0) {
-        // Due now or past
-        const isRecent = Math.abs(diff) < 15 * 60 * 1000; // within last 15 mins
+        // Due now (within 2 mins) or past
+        const isRecent = Math.abs(diff) < 2 * 60 * 1000; // 2 mins grace window
         setTimeLeft({
           days: 0,
           hours: 0,

@@ -4,6 +4,7 @@ import { getDictionary, Locale } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { AnimatedTitle, FadeInView } from '@/components/animations';
 import { HomeScheduleSection } from '@/features/dashboard/components/HomeScheduleSection';
+import { NotificationShowcaseSection } from '@/features/marketing/components/NotificationShowcaseSection';
 import { Utensils, Send, ShieldCheck, Clock, ArrowRight } from 'lucide-react';
 
 export default async function LandingPage({
@@ -56,6 +57,11 @@ export default async function LandingPage({
       {/* Dynamic Schedule Section: Real User Timeline if Logged in, else Demo Preview */}
       <FadeInView delay={0.6}>
         <HomeScheduleSection locale={currentLocale} dict={dict} />
+      </FadeInView>
+
+      {/* Telegram & Web Push Notification Showcase Section */}
+      <FadeInView delay={0.7}>
+        <NotificationShowcaseSection locale={currentLocale} dict={dict} />
       </FadeInView>
 
       {/* Feature Grid ("Designed for Complete Adherence") */}

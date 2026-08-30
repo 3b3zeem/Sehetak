@@ -55,8 +55,12 @@ export async function updateSession(request: NextRequest) {
     const username = profile?.username || user.email?.split('@')[0] || 'patient';
     const role = profile?.role || 'patient';
 
-    // If user is authenticated and visiting auth pages, redirect to dashboard
+    // If user is authenticated and visiting auth pages, redirect to appropriate dashboard
     if (isAuthPage) {
+      if (role === 'admin') {
+        const targetUrl = new URL(`/${locale}/dashboard/admin`, request.url);
+        return NextResponse.redirect(targetUrl);
+      }
       const targetUrl = new URL(`/${locale}/dashboard/${username}`, request.url);
       return NextResponse.redirect(targetUrl);
     }

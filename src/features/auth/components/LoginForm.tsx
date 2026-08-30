@@ -1,32 +1,32 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Pill } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Pill } from "lucide-react";
+import Image from "next/image";
 
 interface LoginFormProps {
-  locale: 'en' | 'ar';
+  locale: "en" | "ar";
   dict: any;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
   const router = useRouter();
   const supabase = createClient();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMsg('');
+    setErrorMsg("");
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -43,18 +43,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
 
       if (data.user) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', data.user.id)
+          .from("profiles")
+          .select("username, role")
+          .eq("id", data.user.id)
           .single();
 
-        const username = profile?.username || data.user.email?.split('@')[0] || 'patient';
-        toast.success(dict.auth?.loginSuccess || 'Successfully logged in');
+        if (profile?.role === "admin") {
+          toast.success(dict.auth?.loginSuccess || "Successfully logged in");
+          router.push(`/${locale}/dashboard/admin`);
+          return;
+        }
+
+        const username =
+          profile?.username || data.user.email?.split("@")[0] || "patient";
+        toast.success(dict.auth?.loginSuccess || "Successfully logged in");
         router.push(`/${locale}/dashboard/${username}`);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Login failed');
-      toast.error(err.message || 'Login failed');
+      setErrorMsg(err.message || "Login failed");
+      toast.error(err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +71,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?locale=${locale}`,
         },
@@ -74,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
         setIsLoading(false);
       }
     } catch (err: any) {
-      toast.error(err.message || 'Google Sign-In error');
+      toast.error(err.message || "Google Sign-In error");
       setIsLoading(false);
     }
   };
@@ -91,8 +98,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
           priority
           draggable={false}
         />
-        <h2 className="text-2xl font-bold text-slate-900">{dict.auth?.welcomeBack}</h2>
-        <p className="text-xs text-slate-500 mt-1">{dict.auth?.loginSubtitle}</p>
+        <h2 className="text-2xl font-bold text-slate-900">
+          {dict.auth?.welcomeBack}
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">
+          {dict.auth?.loginSubtitle}
+        </p>
       </div>
 
       {errorMsg && (
@@ -126,12 +137,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
           />
         </svg>
-        <span>{locale === 'ar' ? 'المتابعة باستخدام Google' : 'Continue with Google'}</span>
+        <span>
+          {locale === "ar"
+            ? "المتابعة باستخدام Google"
+            : "Continue with Google"}
+        </span>
       </button>
 
       <div className="flex items-center my-4">
         <div className="flex-1 border-t border-slate-200"></div>
-        <span className="px-3 text-slate-400 text-xs">{locale === 'ar' ? 'أو' : 'OR'}</span>
+        <span className="px-3 text-slate-400 text-xs">
+          {locale === "ar" ? "أو" : "OR"}
+        </span>
         <div className="flex-1 border-t border-slate-200"></div>
       </div>
 
@@ -154,14 +171,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
           placeholder="••••••••"
         />
 
-        <Button type="submit" variant="primary" className="w-full mt-2" isLoading={isLoading}>
+        <Button
+          type="submit"
+          variant="primary"
+          className="w-full mt-2"
+          isLoading={isLoading}
+        >
           {dict.auth?.submitLogin}
         </Button>
       </form>
 
       <div className="mt-6 text-center text-xs text-slate-600">
         <span>{dict.auth?.needAccount} </span>
-        <Link href={`/${locale}/register`} className="font-bold text-[#008080] hover:underline">
+        <Link
+          href={`/${locale}/register`}
+          className="font-bold text-[#008080] hover:underline"
+        >
           {dict.auth?.submitRegister}
         </Link>
       </div>

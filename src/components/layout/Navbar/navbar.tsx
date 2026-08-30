@@ -145,8 +145,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     : `/${locale}/login`;
 
   const shortName = userProfile?.username
-    ? userProfile.username.split("_")[0]
-    : "Profile";
+    ? userProfile.username.split('_')[0]
+    : 'Profile';
 
   return (
     <header
@@ -155,10 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     >
       <div className="px-4 sm:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo: logo.svg containing Icon on Left & Text on Right */}
-        <Link
-          href={`/${locale}`}
-          className="flex items-center"
-        >
+        <Link href={`/${locale}`} className="flex items-center">
           <Image
             src="/logo.svg"
             alt="sehetak"

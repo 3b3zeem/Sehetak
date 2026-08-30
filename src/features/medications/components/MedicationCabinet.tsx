@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { MedicationRow } from "@/types";
 import { CountdownBadge } from "@/components/ui/CountdownBadge";
+import { DeleteConfirmModal } from "@/components/ui/DeleteConfirmModal";
 
 interface CabinetProps {
   locale: "en" | "ar";
@@ -41,6 +42,7 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
   } = useMedications();
   const [searchTerm, setSearchTerm] = useState("");
   const [editingMed, setEditingMed] = useState<MedicationRow | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Edit form local state
   const [editName, setEditName] = useState("");
@@ -158,20 +160,45 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
               med.frequency_mode;
 
             // Compute next dose target date for countdown timer
-            const getMedNextScheduledDate = (startTimeStr?: string | null) => {
+            const getMedNextScheduledDate = (
+              startTimeStr?: string | null,
+              frequencyMode?: string,
+              intervalHours?: number | null
+            ) => {
               if (!startTimeStr) return new Date().toISOString();
               const parts = startTimeStr.split(":").map(Number);
               const h = parts[0] || 0;
               const m = parts[1] || 0;
+              const now = new Date();
+
+              // If mode is interval (e.g., every 8 hours)
+              if (frequencyMode === "interval" && intervalHours && intervalHours > 0) {
+                const candidate = new Date();
+                candidate.setHours(h, m, 0, 0);
+                while (candidate.getTime() > now.getTime()) {
+                  candidate.setTime(candidate.getTime() - intervalHours * 3600 * 1000);
+                }
+                while (candidate.getTime() <= now.getTime() + 2 * 60 * 1000) {
+                  candidate.setTime(candidate.getTime() + intervalHours * 3600 * 1000);
+                }
+                return candidate.toISOString();
+              }
+
+              // Daily fixed time (custom_times or meal_anchored)
               const target = new Date();
               target.setHours(h, m, 0, 0);
-              if (target.getTime() < Date.now() - 15 * 60 * 1000) {
+              // If today's dose time + 2 mins grace window has passed, rollover to tomorrow (+24 hours)
+              if (target.getTime() <= now.getTime() + 2 * 60 * 1000) {
                 target.setDate(target.getDate() + 1);
               }
               return target.toISOString();
             };
 
-            const nextDoseTargetDate = getMedNextScheduledDate(med.start_time);
+            const nextDoseTargetDate = getMedNextScheduledDate(
+              med.start_time,
+              med.frequency_mode,
+              med.interval_hours
+            );
 
             return (
               <div
@@ -208,7 +235,7 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
 
                       {/* Delete Button */}
                       <button
-                        onClick={() => deleteMedication(med.id)}
+                        onClick={() => setDeleteTarget({ id: med.id, name: med.name })}
                         className="text-slate-400 hover:text-red-600 p-1.5 hover:bg-red-50 transition-colors cursor-pointer"
                         title={
                           locale === "ar" ? "حذف الدواء" : "Delete medication"
@@ -530,6 +557,25 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
           </form>
         </Modal>
       )}
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMedication(deleteTarget.id);
+          }
+        }}
+        title={locale === 'ar' ? 'حذف الدواء' : 'Delete Medication'}
+        description={
+          locale === 'ar'
+            ? 'هل أنت تأكد من أنك تريد حذف هذا الدواء؟ لا يمكن التراجع عن هذا الإجراء.'
+            : 'Are you sure you want to delete this medication? This action cannot be undone.'
+        }
+        itemTitle={deleteTarget?.name}
+        locale={locale}
+      />
     </div>
   );
 };

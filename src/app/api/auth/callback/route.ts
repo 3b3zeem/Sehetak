@@ -26,9 +26,13 @@ export async function GET(request: NextRequest) {
     // Check existing profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('username')
+      .select('username, role')
       .eq('id', userId)
       .single();
+
+    if (profile?.role === 'admin') {
+      return NextResponse.redirect(`${requestUrl.origin}/${locale}/dashboard/admin`);
+    }
 
     if (profile?.username) {
       username = profile.username;

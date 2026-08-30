@@ -11,6 +11,7 @@ import { Calendar, Plus, MapPin, User, Upload, Clock, Edit3, Trash2, Bell, FileT
 import { DoctorAppointmentRow } from '@/types';
 import { toast } from 'sonner';
 import { CountdownBadge } from '@/components/ui/CountdownBadge';
+import { DeleteConfirmModal } from '@/components/ui/DeleteConfirmModal';
 
 interface AppointmentsProps {
   locale: 'en' | 'ar';
@@ -22,6 +23,7 @@ export const DoctorAppointments: React.FC<AppointmentsProps> = ({ locale, dict }
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const [doctorName, setDoctorName] = useState('');
   const [specialty, setSpecialty] = useState('');
@@ -212,11 +214,7 @@ export const DoctorAppointments: React.FC<AppointmentsProps> = ({ locale, dict }
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(locale === 'ar' ? 'هل أنت تأكد من حذف هذا الموعد؟' : 'Are you sure you want to delete this appointment?')) {
-                              deleteAppointment(appt.id);
-                            }
-                          }}
+                          onClick={() => setDeleteTarget({ id: appt.id, name: appt.doctor_name })}
                           title="Delete appointment"
                           className="p-1.5 text-slate-600 hover:text-red-600 hover:bg-white rounded transition-colors"
                         >
@@ -490,6 +488,24 @@ export const DoctorAppointments: React.FC<AppointmentsProps> = ({ locale, dict }
           </div>
         </div>
       )}
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteAppointment(deleteTarget.id);
+          }
+        }}
+        title={locale === 'ar' ? 'حذف الموعد الطبي' : 'Delete Appointment'}
+        description={
+          locale === 'ar'
+            ? 'هل أنت تأكد من أنك تريد حذف هذا الموعد الطبي؟ لا يمكن التراجع عن هذا الإجراء.'
+            : 'Are you sure you want to delete this appointment? This action cannot be undone.'
+        }
+        itemTitle={deleteTarget?.name}
+        locale={locale}
+      />
     </div>
   );
 };

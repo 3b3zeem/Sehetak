@@ -5,6 +5,7 @@ import { TableSkeleton } from '@/components/feedback/skeletons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Pill, Trash2 } from 'lucide-react';
+import { DeleteConfirmModal } from '@/components/ui/DeleteConfirmModal';
 import { useAdminMedications } from '../hooks/useAdminMedications';
 
 interface AdminMedicationsProps {
@@ -14,6 +15,7 @@ interface AdminMedicationsProps {
 
 export const AdminMedications: React.FC<AdminMedicationsProps> = ({ locale, dict }) => {
   const [search, setSearch] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const { medications, isLoading, deleteMutation } = useAdminMedications(search);
 
   if (isLoading) return <TableSkeleton />;
@@ -74,7 +76,7 @@ export const AdminMedications: React.FC<AdminMedicationsProps> = ({ locale, dict
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => deleteMutation.mutate(med.id)}
+                    onClick={() => setDeleteTarget({ id: med.id, name: med.name })}
                     isLoading={deleteMutation.isPending && deleteMutation.variables === med.id}
                     className="text-red-600 hover:bg-red-50 p-1.5"
                   >
@@ -86,6 +88,25 @@ export const AdminMedications: React.FC<AdminMedicationsProps> = ({ locale, dict
           </tbody>
         </table>
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate(deleteTarget.id);
+          }
+        }}
+        title={locale === 'ar' ? 'حذف سجل الدواء (إدارة)' : 'Delete Medication Record (Admin)'}
+        description={
+          locale === 'ar'
+            ? 'هل أنت تأكد من أنك تريد حذف هذا الدواء بصفتك مسؤوولاً؟ لا يمكن التراجع عن هذا الإجراء.'
+            : 'Are you sure you want to delete this medication record as Admin? This action cannot be undone.'
+        }
+        itemTitle={deleteTarget?.name}
+        locale={locale}
+      />
     </div>
   );
 };

@@ -1,14 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Pill } from "lucide-react";
 import Image from "next/image";
+import { useLogin, useGoogleAuth } from "../hooks/useAuth";
 
 interface LoginFormProps {
   locale: "en" | "ar";
@@ -16,74 +13,15 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
-  const router = useRouter();
-  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const loginMutation = useLogin(locale, dict);
+  const googleAuthMutation = useGoogleAuth(locale);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setErrorMsg("");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-        toast.error(error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("username, role")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profile?.role === "admin") {
-          toast.success(dict.auth?.loginSuccess || "Successfully logged in");
-          router.push(`/${locale}/dashboard/admin`);
-          return;
-        }
-
-        const username =
-          profile?.username || data.user.email?.split("@")[0] || "patient";
-        toast.success(dict.auth?.loginSuccess || "Successfully logged in");
-        router.push(`/${locale}/dashboard/${username}`);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Login failed");
-      toast.error(err.message || "Login failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?locale=${locale}`,
-        },
-      });
-      if (error) {
-        toast.error(error.message);
-        setIsLoading(false);
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Google Sign-In error");
-      setIsLoading(false);
-    }
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -106,17 +44,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
         </p>
       </div>
 
-      {errorMsg && (
+      {loginMutation.isError && (
         <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium">
-          {errorMsg}
+          {(loginMutation.error as any)?.message || "Login failed"}
         </div>
       )}
 
       {/* Google OAuth Login Button */}
       <button
         type="button"
-        onClick={handleGoogleLogin}
-        disabled={isLoading}
+        onClick={() => googleAuthMutation.mutate()}
+        disabled={googleAuthMutation.isPending || loginMutation.isPending}
         className="w-full mb-4 py-2.5 px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-3 transition-colors disabled:opacity-60"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -175,7 +113,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
           type="submit"
           variant="primary"
           className="w-full mt-2"
-          isLoading={isLoading}
+          isLoading={loginMutation.isPending}
         >
           {dict.auth?.submitLogin}
         </Button>

@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Pill } from "lucide-react";
 import Image from "next/image";
+import { useRegister, useGoogleAuth } from "../hooks/useAuth";
 
 interface RegisterFormProps {
   locale: "en" | "ar";
@@ -16,20 +14,18 @@ interface RegisterFormProps {
 }
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
-  const router = useRouter();
-  const supabase = createClient();
-
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const registerMutation = useRegister(locale, dict);
+  const googleAuthMutation = useGoogleAuth(locale);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrorMsg("");
 
     if (password !== confirmPassword) {
@@ -40,78 +36,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
           : "Passwords do not match");
       setErrorMsg(mismatchMsg);
       toast.error(mismatchMsg);
-      setIsLoading(false);
       return;
     }
 
-    const formattedUsername = username
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "_");
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            username: formattedUsername,
-          },
-        },
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-        toast.error(error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      if (data.user) {
-        // Create profile in profiles table
-        await supabase.from("profiles").insert({
-          id: data.user.id,
-          username: formattedUsername,
-          full_name: fullName,
-          email,
-          role: "patient",
-          locale,
-        });
-
-        toast.success(
-          dict.auth?.registerSuccess ||
-            (locale === "ar"
-              ? "تم إنشاء الحساب بنجاح"
-              : "Account created successfully"),
-        );
-        router.push(`/${locale}/login`);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Registration failed");
-      toast.error(err.message || "Registration failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?locale=${locale}`,
-        },
-      });
-      if (error) {
-        toast.error(error.message);
-        setIsLoading(false);
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Google Sign-In error");
-      setIsLoading(false);
-    }
+    registerMutation.mutate({
+      fullName,
+      username,
+      email,
+      password,
+      locale,
+    });
   };
 
   return (
@@ -143,8 +77,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
       {/* Google OAuth Login Button */}
       <button
         type="button"
-        onClick={handleGoogleLogin}
-        disabled={isLoading}
+        onClick={() => googleAuthMutation.mutate()}
+        disabled={googleAuthMutation.isPending || registerMutation.isPending}
         className="w-full mb-4 py-2.5 px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-3 transition-colors disabled:opacity-60"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -229,7 +163,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ locale, dict }) => {
           type="submit"
           variant="primary"
           className="w-full mt-2"
-          isLoading={isLoading}
+          isLoading={registerMutation.isPending}
         >
           {dict.auth?.submitRegister}
         </Button>

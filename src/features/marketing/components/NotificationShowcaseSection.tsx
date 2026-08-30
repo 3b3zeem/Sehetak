@@ -11,6 +11,8 @@ import {
 import { FadeInView, AnimatedTitle } from "@/components/animations";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
 
 interface NotificationShowcaseProps {
   locale: "en" | "ar";
@@ -21,6 +23,26 @@ export const NotificationShowcaseSection: React.FC<
   NotificationShowcaseProps
 > = ({ locale, dict }) => {
   const isAr = locale === "ar";
+  const supabase = createClient();
+
+  const { data: userId } = useQuery({
+    queryKey: ["showcase-user-id"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return user?.id || null;
+    },
+  });
+
+  const botUsername =
+    process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME ||
+    process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ||
+    "SehatakMed_bot";
+
+  const telegramLink = userId
+    ? `https://t.me/${botUsername}?start=${userId}`
+    : `/${locale}/login`;
 
   return (
     <section className="space-y-12 py-10 bg-white text-slate-900 p-8 md:p-12 relative overflow-hidden border border-slate-200 shadow-xs">
@@ -97,8 +119,8 @@ export const NotificationShowcaseSection: React.FC<
             </div>
 
             <a
-              href="https://t.me/SehatakMed_bot"
-              target="_blank"
+              href={telegramLink}
+              target={userId ? "_blank" : "_self"}
               rel="noopener noreferrer"
               className="pt-2"
             >

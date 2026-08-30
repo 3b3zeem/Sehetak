@@ -97,7 +97,7 @@ export const NotificationShowcaseSection: React.FC<
             </div>
 
             <a
-              href="https://t.me/SehetakMed_bot"
+              href="https://t.me/SehatakMed_bot"
               target="_blank"
               rel="noopener noreferrer"
               className="pt-2"

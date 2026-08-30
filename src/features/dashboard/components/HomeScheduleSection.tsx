@@ -66,35 +66,6 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
 
     return (
       <section className="max-w-5xl mx-auto space-y-4">
-        {/* User Greeting Bar */}
-        <div className="bg-emerald-50 border border-emerald-300 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 text-white flex items-center justify-center font-bold">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-emerald-950 text-base">
-                {locale === "ar"
-                  ? `أهلاً بك مجدداً، ${userProfile.full_name || userProfile.username}`
-                  : `Welcome back, ${userProfile.full_name || userProfile.username}`}
-              </h3>
-              <span className="text-xs text-emerald-700">
-                {locale === "ar"
-                  ? "جدولك اليومي المباشر يعرض أدويتك الحقيقية ومواعيدها المسجلة"
-                  : "Your live daily schedule with real medications and meal anchors"}
-              </span>
-            </div>
-          </div>
-
-          <Link href={`/${locale}/dashboard/${userProfile.username}`}>
-            <Button size="sm" variant="primary" className="gap-2">
-              <span>
-                {locale === "ar" ? "فتح لوحة التحكم" : "Open Dashboard"}
-              </span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
 
         {/* Telegram Bot Notification Activation Banner */}
         {!userProfile.telegram_chat_id ? (

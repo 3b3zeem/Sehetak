@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { TelegramConnectCard, usePushManager } from "@/features/notifications";
+import { TelegramConnectCard, WebPushConnectCard } from "@/features/notifications";
 import { useUpdateBaselineMeals } from "../hooks/useUpdateBaselineMeals";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Utensils,
-  Bell,
-  ShieldCheck,
   User,
   Mail,
   Shield,
@@ -41,11 +39,6 @@ export const UserSettings: React.FC<SettingsProps> = ({
   const [bTime, setBTime] = useState(user.breakfast_time || "08:00");
   const [lTime, setLTime] = useState(user.lunch_time || "14:00");
   const [dTime, setDTime] = useState(user.dinner_time || "20:00");
-  const {
-    isSubscribed,
-    subscribeToPush,
-    loading: pushLoading,
-  } = usePushManager();
   const updateMealsMutation = useUpdateBaselineMeals(
     dict.common?.success || "Baseline meal times saved",
   );
@@ -206,36 +199,7 @@ export const UserSettings: React.FC<SettingsProps> = ({
       />
 
       {/* 3. Web Push Toggle */}
-      <div className="bg-white border border-slate-300 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 font-bold">
-            <Bell className="w-6 h-6" />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 text-base">
-              {dict.settings?.pushTitle}
-            </h4>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {dict.settings?.pushDesc}
-            </p>
-            {isSubscribed && (
-              <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-300">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{dict.settings?.pushActive}</span>
-              </span>
-            )}
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={subscribeToPush}
-          isLoading={pushLoading}
-          disabled={isSubscribed}
-        >
-          {isSubscribed ? dict.settings?.pushActive : dict.settings?.enablePush}
-        </Button>
-      </div>
+      <WebPushConnectCard dict={dict} locale={locale} />
     </div>
   );
 };

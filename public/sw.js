@@ -6,8 +6,8 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'Sehatak Medication Reminder';
     const options = {
       body: data.body || 'It is time to take your scheduled dose.',
-      icon: data.icon || '/icons/icon-192.png',
-      badge: '/icons/badge-72.png',
+      icon: data.icon || '/icon.png',
+      badge: '/icon.png',
       vibrate: [200, 100, 200],
       data: {
         url: data.url || '/',

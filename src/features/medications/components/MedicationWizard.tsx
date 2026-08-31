@@ -13,6 +13,7 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
+import { IntervalSchedulePreview } from "./IntervalSchedulePreview";
 
 interface WizardProps {
   locale: "en" | "ar";
@@ -208,22 +209,31 @@ export const MedicationWizard: React.FC<WizardProps> = ({
             />
 
             {frequencyMode === "interval" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label={dict.medications?.wizard?.intervalLabel}
-                  type="number"
-                  min="1"
-                  max="24"
-                  value={intervalHours}
-                  onChange={(e) => setIntervalHours(e.target.value)}
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label={dict.medications?.wizard?.intervalLabel}
+                    type="number"
+                    min="1"
+                    max="24"
+                    value={intervalHours}
+                    onChange={(e) => setIntervalHours(e.target.value)}
+                  />
+                  <Input
+                    label={dict.medications?.wizard?.startTimeLabel}
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                </div>
+
+                <IntervalSchedulePreview
+                  startTime={startTime}
+                  intervalHours={parseInt(intervalHours, 10) || 8}
+                  locale={locale}
+                  onIntervalSelect={(hours) => setIntervalHours(String(hours))}
                 />
-                <Input
-                  label={dict.medications?.wizard?.startTimeLabel}
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-              </div>
+              </>
             )}
 
             {frequencyMode === "meal_anchored" && (

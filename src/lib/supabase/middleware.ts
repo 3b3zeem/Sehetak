@@ -40,7 +40,11 @@ export async function updateSession(request: NextRequest) {
   const locale = segments[0] === 'ar' || segments[0] === 'en' ? segments[0] : 'en';
 
   // Check path patterns strictly using URL segments to prevent infinite redirect loops
-  const isAuthPage = segments[1] === 'login' || segments[1] === 'register';
+  const isAuthPage =
+    segments[1] === 'login' ||
+    segments[1] === 'register' ||
+    segments[1] === 'forgot-password' ||
+    segments[1] === 'reset-password';
   const isDashboardPage = segments[1] === 'dashboard';
   const isAdminPage = isDashboardPage && segments[2] === 'admin';
 

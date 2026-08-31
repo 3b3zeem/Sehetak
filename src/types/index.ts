@@ -45,3 +45,35 @@ export interface AdminOverviewStats {
   totalRemindersDispatched: number;
   recentUsers: ProfileRow[];
 }
+
+export type CaregiverLinkStatus = 'pending' | 'active' | 'rejected';
+
+export interface CaregiverLinkRow {
+  id: string;
+  patient_id: string;
+  caregiver_id: string | null;
+  caregiver_name?: string | null;
+  caregiver_email?: string | null;
+  invite_code: string;
+  patient_label: string;
+  status: CaregiverLinkStatus;
+  alert_delay_minutes: number;
+  notify_push: boolean;
+  notify_telegram: boolean;
+  expires_at: string;
+  created_at: string;
+}
+
+export interface CaregiverPatientOverview {
+  linkId: string;
+  patientId: string;
+  patientName: string;
+  patientLabel: string;
+  adherencePercentage: number;
+  totalToday: number;
+  takenToday: number;
+  pendingToday: number;
+  missedToday: number;
+  recentLogs: CalculatedDoseItem[];
+}
+

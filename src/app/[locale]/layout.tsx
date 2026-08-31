@@ -116,7 +116,7 @@ export default async function LocaleLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar locale={currentLocale} dict={dict} userProfile={userProfile} />
-      <main className="flex-1 w-full px-4 sm:px-8 py-8">
+      <main className="flex-1 w-full px-4 sm:px-8 py-8 pt-20">
         {children}
       </main>
       <Footer locale={currentLocale} dict={dict} />

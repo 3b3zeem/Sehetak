@@ -88,35 +88,41 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [supabase]);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuItemsRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
-  // GSAP Scroll Direction Hide / Show Header
+  // Smart Header Scroll Effect: Hide on Scroll Down, Reveal immediately on Scroll Up
   useEffect(() => {
-    const handleScroll = () => {
-      if (!headerRef.current) return;
-      const currentScrollY = window.scrollY;
+    let lastScroll = window.scrollY;
 
-      // Hide header when scrolling down after threshold, show when scrolling up
-      if (currentScrollY > 60 && currentScrollY > lastScrollY.current) {
-        gsap.to(headerRef.current, {
-          yPercent: -100,
-          duration: 0.35,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      } else if (currentScrollY < lastScrollY.current) {
-        gsap.to(headerRef.current, {
-          yPercent: 0,
-          duration: 0.35,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+
+      // Enable shadow effect when scrolled past 20px
+      setIsScrolled(currentScroll > 20);
+
+      // Always show navbar near the top of the page
+      if (currentScroll <= 60) {
+        setIsVisible(true);
+        lastScroll = Math.max(0, currentScroll);
+        return;
       }
 
-      lastScrollY.current = currentScrollY;
+      const diff = currentScroll - lastScroll;
+
+      if (diff > 5) {
+        // Scrolling DOWN -> Hide Header
+        setIsVisible(false);
+        lastScroll = currentScroll;
+      } else if (diff < -5) {
+        // Scrolling UP -> Reveal Header Immediately!
+        setIsVisible(true);
+        lastScroll = currentScroll;
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -203,7 +209,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 shadow-sm overflow-x-clip"
+      className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-300 transition-transform duration-300 ease-in-out ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      } ${isScrolled ? "shadow-md" : "shadow-sm"}`}
     >
       <div className="px-4 sm:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo: logo.svg containing Icon on Left & Text on Right */}

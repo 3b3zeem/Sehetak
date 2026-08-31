@@ -69,7 +69,7 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
         >
           <div>
             <h3 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
-              <span>Support & Inquiries</span>
+              <span>{dict.marketing?.contactCardTitle || 'Support & Inquiries'}</span>
             </h3>
 
             <div className="space-y-5 text-xs sm:text-sm text-slate-300">
@@ -78,7 +78,9 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-400 font-medium">Email Us</div>
+                  <div className="text-[10px] text-slate-400 font-medium">
+                    {dict.marketing?.contactEmailLabel || 'Email Us'}
+                  </div>
                   <span className="font-medium text-white">support@sehetak.app</span>
                 </div>
               </div>
@@ -88,7 +90,9 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-400 font-medium">Call Support</div>
+                  <div className="text-[10px] text-slate-400 font-medium">
+                    {dict.marketing?.contactPhoneLabel || 'Call Support'}
+                  </div>
                   <span className="font-medium text-white">+20 (100) 000-0000</span>
                 </div>
               </div>
@@ -98,8 +102,12 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-400 font-medium">Headquarters</div>
-                  <span className="font-medium text-white">Medical Tech District, Cairo, Egypt</span>
+                  <div className="text-[10px] text-slate-400 font-medium">
+                    {dict.marketing?.contactLocationLabel || 'Headquarters'}
+                  </div>
+                  <span className="font-medium text-white">
+                    {dict.marketing?.contactLocationValue || 'Medical Tech District, Cairo, Egypt'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -107,7 +115,9 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
 
           <div className="border-t border-slate-800 pt-4 text-xs text-slate-400 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#008080]" />
-            <span>Available 24/7 for urgent medication alert support.</span>
+            <span>
+              {dict.marketing?.contactAvailableBadge || 'Available 24/7 for urgent medication alert support.'}
+            </span>
           </div>
         </div>
 
@@ -117,16 +127,27 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
           onSubmit={handleSubmit}
           className="contact-animate bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-4"
         >
-          <Input label="Your Name" required placeholder="Full Name" />
-          <Input label="Email Address" type="email" required placeholder="name@example.com" />
+          <Input
+            label={dict.marketing?.contactFormNameLabel || 'Your Name'}
+            required
+            placeholder={dict.marketing?.contactFormNamePlaceholder || 'Full Name'}
+          />
+          <Input
+            label={dict.marketing?.contactFormEmailLabel || 'Email Address'}
+            type="email"
+            required
+            placeholder={dict.marketing?.contactFormEmailPlaceholder || 'name@example.com'}
+          />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-700">Message</label>
+            <label className="text-xs font-semibold text-slate-700">
+              {dict.marketing?.contactFormMessageLabel || 'Message'}
+            </label>
             <textarea
               rows={4}
               required
               className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-[#008080] focus:outline-none transition-shadow"
-              placeholder="How can we assist you?"
+              placeholder={dict.marketing?.contactFormMessagePlaceholder || 'How can we assist you?'}
             />
           </div>
 
@@ -137,7 +158,7 @@ export const ContactAnimatedContent: React.FC<ContactAnimatedContentProps> = ({ 
             className="w-full gap-2 bg-[#008080] hover:bg-[#006666] text-white"
           >
             <Send className="w-4 h-4" />
-            <span>Send Message</span>
+            <span>{dict.marketing?.contactFormSubmit || 'Send Message'}</span>
           </Button>
         </form>
       </div>

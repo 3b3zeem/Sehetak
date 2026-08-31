@@ -21,6 +21,8 @@ import {
 import { MedicationRow } from "@/types";
 import { CountdownBadge } from "@/components/ui/CountdownBadge";
 import { DeleteConfirmModal } from "@/components/ui/DeleteConfirmModal";
+import { IntervalSchedulePreview } from "./IntervalSchedulePreview";
+import { ShiftScheduleModal } from "./ShiftScheduleModal";
 
 interface CabinetProps {
   locale: "en" | "ar";
@@ -43,6 +45,7 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [editingMed, setEditingMed] = useState<MedicationRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [shiftMed, setShiftMed] = useState<MedicationRow | null>(null);
 
   // Edit form local state
   const [editName, setEditName] = useState("");
@@ -222,6 +225,21 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1">
+                      {/* Rolling Smart Timer Button */}
+                      {med.frequency_mode === "interval" && (
+                        <button
+                          onClick={() => setShiftMed(med)}
+                          className="text-[#008080] hover:bg-teal-50 p-1.5 rounded transition-colors cursor-pointer border border-teal-200"
+                          title={
+                            locale === "ar"
+                              ? "أخذتها الآن - تعديل الجدول الزمني"
+                              : "Shift schedule from now"
+                          }
+                        >
+                          <Clock className="w-4 h-4 text-[#008080]" />
+                        </button>
+                      )}
+
                       {/* Edit Button */}
                       <button
                         onClick={() => handleOpenEditModal(med)}
@@ -463,7 +481,6 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
                     onChange={(e) => setEditIntervalHours(e.target.value)}
                   />
                 )}
-
                 {editFrequencyMode === "meal_anchored" && (
                   <Select
                     label={
@@ -495,6 +512,15 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
                   />
                 )}
               </div>
+
+              {editFrequencyMode === "interval" && (
+                <IntervalSchedulePreview
+                  startTime={editStartTime}
+                  intervalHours={parseInt(editIntervalHours, 10) || 8}
+                  locale={locale}
+                  onIntervalSelect={(hours) => setEditIntervalHours(String(hours))}
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -574,6 +600,14 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
             : 'Are you sure you want to delete this medication? This action cannot be undone.'
         }
         itemTitle={deleteTarget?.name}
+        locale={locale}
+      />
+
+      {/* Shift Schedule Rolling Smart Timer Modal */}
+      <ShiftScheduleModal
+        isOpen={!!shiftMed}
+        onClose={() => setShiftMed(null)}
+        medication={shiftMed}
         locale={locale}
       />
     </div>

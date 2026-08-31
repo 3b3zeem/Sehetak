@@ -109,6 +109,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ locale, dict }) => {
           placeholder="••••••••"
         />
 
+        <div className="flex justify-end pt-0.5">
+          <Link
+            href={`/${locale}/forgot-password`}
+            className="text-xs font-semibold text-[#008080] hover:underline"
+          >
+            {dict.auth?.forgotPassword || (locale === "ar" ? "نسيت كلمة المرور؟" : "Forgot Password?")}
+          </Link>
+        </div>
+
         <Button
           type="submit"
           variant="primary"

@@ -118,13 +118,16 @@ export const AboutAnimatedContent: React.FC<AboutAnimatedContentProps> = ({ dict
           <div className="card-icon w-12 h-12 rounded-xl bg-teal-50 text-[#008080] flex items-center justify-center">
             <ShieldCheck className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">Data Integrity & Privacy</h3>
+          <h3 className="text-lg font-bold text-slate-900">
+            {dict.marketing?.aboutCard1Title || 'Data Integrity & Privacy'}
+          </h3>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            All user data, prescriptions, and health metrics are secured using Supabase Row Level Security (RLS) policies and encrypted server configurations.
+            {dict.marketing?.aboutCard1Desc ||
+              'All user data, prescriptions, and health metrics are secured using Supabase Row Level Security (RLS) policies and encrypted server configurations.'}
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-[#008080]">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Bank-Grade Security Standards</span>
+            <span>{dict.marketing?.aboutCard1Badge || 'Bank-Grade Security Standards'}</span>
           </div>
         </div>
 
@@ -139,13 +142,16 @@ export const AboutAnimatedContent: React.FC<AboutAnimatedContentProps> = ({ dict
           <div className="card-icon w-12 h-12 rounded-xl bg-sky-50 text-[#0077b6] flex items-center justify-center">
             <Pill className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">Adherence Excellence</h3>
+          <h3 className="text-lg font-bold text-slate-900">
+            {dict.marketing?.aboutCard2Title || 'Adherence Excellence'}
+          </h3>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            By anchoring medications around daily meal times and sending multi-channel reminders, Sehetak dramatically improves chronic condition management.
+            {dict.marketing?.aboutCard2Desc ||
+              'By anchoring medications around daily meal times and sending multi-channel reminders, Sehetak dramatically improves chronic condition management.'}
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs font-semibold text-[#0077b6]">
             <Sparkles className="w-4 h-4" />
-            <span>Smart Meal Anchoring Logic</span>
+            <span>{dict.marketing?.aboutCard2Badge || 'Smart Meal Anchoring Logic'}</span>
           </div>
         </div>
       </div>

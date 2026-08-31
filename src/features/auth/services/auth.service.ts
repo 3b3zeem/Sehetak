@@ -122,4 +122,53 @@ export const authService = {
 
     return { success: true, data: null, message: "OAuth initiated" };
   },
+
+  async requestPasswordReset(
+    email: string,
+    locale: "ar" | "en" = "ar"
+  ): Promise<ApiResponse<null>> {
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, locale }),
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return {
+        success: false,
+        data: null,
+        message: err.message || "Failed to send reset email",
+      };
+    }
+  },
+
+  async resetPasswordWithOtp(payload: {
+    email: string;
+    token: string;
+    newPassword: string;
+  }): Promise<ApiResponse<null>> {
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: payload.email,
+          otpCode: payload.token,
+          newPassword: payload.newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return {
+        success: false,
+        data: null,
+        message: err.message || "Failed to reset password",
+      };
+    }
+  },
 };

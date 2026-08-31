@@ -29,22 +29,47 @@ export const FadeInView: React.FC<FadeInViewProps> = ({
     if (direction === 'left') x = 30;
     if (direction === 'right') x = -30;
 
-    gsap.fromTo(
-      element,
-      {
-        opacity: 0,
-        x,
-        y,
+    const resetElement = () => {
+      gsap.set(element, { opacity: 0, x, y });
+    };
+
+    const animateIn = () => {
+      gsap.fromTo(
+        element,
+        {
+          opacity: 0,
+          x,
+          y,
+        },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration: 0.8,
+          delay,
+          ease: 'power3.out',
+        }
+      );
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateIn();
+          } else {
+            resetElement();
+          }
+        });
       },
-      {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        duration: 0.8,
-        delay,
-        ease: 'power3.out',
-      }
+      { threshold: 0.1 }
     );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [delay, direction]);
 
   return (

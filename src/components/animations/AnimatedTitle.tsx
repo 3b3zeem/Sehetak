@@ -5,7 +5,7 @@ import gsap from 'gsap';
 
 interface AnimatedTitleProps {
   children: React.ReactNode;
-  as?: 'h1' | 'h2' | 'h3' | 'p' | 'div';
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'div' | 'span';
   className?: string;
   delay?: number;
 }
@@ -16,28 +16,55 @@ export const AnimatedTitle: React.FC<AnimatedTitleProps> = ({
   className = '',
   delay = 0.1,
 }) => {
-  const ref = useRef<HTMLHeadingElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
-    gsap.fromTo(
-      element,
-      {
-        opacity: 0,
-        y: 28,
-        filter: 'blur(4px)',
+    const resetElement = () => {
+      gsap.set(element, { opacity: 0, y: 25, rotateX: -30, filter: 'blur(8px)' });
+    };
+
+    const animateIn = () => {
+      gsap.fromTo(
+        element,
+        {
+          opacity: 0,
+          y: 25,
+          rotateX: -30,
+          filter: 'blur(8px)',
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          filter: 'blur(0px)',
+          duration: 0.75,
+          delay,
+          ease: 'power3.out',
+        }
+      );
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateIn();
+          } else {
+            resetElement();
+          }
+        });
       },
-      {
-        opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.9,
-        delay,
-        ease: 'power3.out',
-      }
+      { threshold: 0.1 }
     );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [delay]);
 
   return (

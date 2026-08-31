@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Pill, Calendar, Settings } from 'lucide-react';
+import { LayoutDashboard, Pill, Calendar, Settings, Users } from 'lucide-react';
 
 interface PatientDashboardTabsProps {
   locale: 'en' | 'ar';
@@ -41,6 +41,13 @@ export const PatientDashboardTabs: React.FC<PatientDashboardTabsProps> = ({
       href: `${basePath}/appointments`,
       exact: false,
       icon: Calendar,
+    },
+    {
+      id: 'caregiver',
+      label: locale === 'ar' ? 'رعاية الأقارب' : 'Family Sync',
+      href: `${basePath}/caregiver`,
+      exact: false,
+      icon: Users,
     },
     {
       id: 'settings',

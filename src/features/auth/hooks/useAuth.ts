@@ -69,3 +69,52 @@ export function useGoogleAuth(locale: "en" | "ar") {
     },
   });
 }
+
+export function useRequestPasswordReset(locale: "en" | "ar", dict: any) {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (email: string) => authService.requestPasswordReset(email, locale),
+    onSuccess: (res, email) => {
+      if (res.success) {
+        toast.success(
+          dict?.auth?.resetEmailSent ||
+            (locale === "ar"
+              ? "تم إرسال كود استعادة كلمة المرور إلى بريدك الإلكتروني"
+              : "Password reset code sent to your email")
+        );
+        router.push(`/${locale}/reset-password?email=${encodeURIComponent(email)}`);
+      } else {
+        toast.error(res.message || "Failed to send reset email");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Error sending reset email");
+    },
+  });
+}
+
+export function useResetPasswordWithOtp(locale: "en" | "ar", dict: any) {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (payload: { email: string; token: string; newPassword: string }) =>
+      authService.resetPasswordWithOtp(payload),
+    onSuccess: (res) => {
+      if (res.success) {
+        toast.success(
+          dict?.auth?.resetPasswordSuccess ||
+            (locale === "ar"
+              ? "تم تغيير كلمة المرور بنجاح! يمكنك تسجيل الدخول الآن"
+              : "Password updated successfully! Please sign in")
+        );
+        router.push(`/${locale}/login`);
+      } else {
+        toast.error(res.message || "Password reset failed");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Password reset error");
+    },
+  });
+}

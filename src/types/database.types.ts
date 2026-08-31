@@ -126,6 +126,7 @@ export interface Database {
           scheduled_for: string;
           taken_at: string | null;
           status: LogStatus;
+          caregiver_notified_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -135,6 +136,7 @@ export interface Database {
           scheduled_for: string;
           taken_at?: string | null;
           status?: LogStatus;
+          caregiver_notified_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -144,6 +146,7 @@ export interface Database {
           scheduled_for?: string;
           taken_at?: string | null;
           status?: LogStatus;
+          caregiver_notified_at?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -157,6 +160,63 @@ export interface Database {
           {
             foreignKeyName: 'medication_logs_user_id_fkey';
             columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      caregiver_links: {
+        Row: {
+          id: string;
+          patient_id: string;
+          caregiver_id: string | null;
+          invite_code: string;
+          patient_label: string;
+          status: 'pending' | 'active' | 'rejected';
+          alert_delay_minutes: number;
+          notify_push: boolean;
+          notify_telegram: boolean;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          caregiver_id?: string | null;
+          invite_code: string;
+          patient_label?: string;
+          status?: 'pending' | 'active' | 'rejected';
+          alert_delay_minutes?: number;
+          notify_push?: boolean;
+          notify_telegram?: boolean;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          caregiver_id?: string | null;
+          invite_code?: string;
+          patient_label?: string;
+          status?: 'pending' | 'active' | 'rejected';
+          alert_delay_minutes?: number;
+          notify_push?: boolean;
+          notify_telegram?: boolean;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'caregiver_links_patient_id_fkey';
+            columns: ['patient_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'caregiver_links_caregiver_id_fkey';
+            columns: ['caregiver_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
@@ -262,6 +322,18 @@ export interface Database {
       is_admin: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
+      };
+      generate_caregiver_invite: {
+        Args: {
+          p_patient_label?: string;
+        };
+        Returns: string;
+      };
+      accept_caregiver_invite: {
+        Args: {
+          p_invite_code: string;
+        };
+        Returns: Json;
       };
     };
     Enums: {

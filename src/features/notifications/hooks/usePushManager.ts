@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -19,21 +19,37 @@ export function usePushManager() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const syncSubscriptionWithServer = useCallback(async (sub: PushSubscription) => {
+    try {
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub }),
+      });
+      const json = await res.json();
+      return json.success;
+    } catch (err) {
+      console.error('Error syncing push subscription:', err);
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true);
-      // Register service worker
       navigator.serviceWorker
         .register('/sw.js')
         .then(async (reg) => {
           const existingSub = await reg.pushManager.getSubscription();
           if (existingSub) {
             setIsSubscribed(true);
+            // Automatically ensure existing subscription is persisted to database for logged in user
+            await syncSubscriptionWithServer(existingSub);
           }
         })
         .catch(console.error);
     }
-  }, []);
+  }, [syncSubscriptionWithServer]);
 
   const subscribeToPush = async () => {
     if (!isSupported) {
@@ -50,28 +66,26 @@ export function usePushManager() {
     setLoading(true);
     try {
       const reg = await navigator.serviceWorker.ready;
-      const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+      let sub = await reg.pushManager.getSubscription();
 
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: convertedKey,
-      });
+      if (!sub) {
+        const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedKey,
+        });
+      }
 
-      const res = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub }),
-      });
+      const success = await syncSubscriptionWithServer(sub);
 
-      const json = await res.json();
-      if (json.success) {
+      if (success) {
         setIsSubscribed(true);
-        toast.success('Web Push Notifications active on this device!');
+        toast.success('تم تفعيل إشعارات المتصفح وتأكيد ربطها بحسابك بنجاح 🔔');
       } else {
-        toast.error(json.message || 'Failed to subscribe');
+        toast.error('فشل حفظ اشتراك الإشعارات في قاعدة البيانات. الرجاء التأكد من تسجيل الدخول.');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Push registration failed');
+      toast.error(err.message || 'فشل تفعيل إشعارات المتصفح');
     } finally {
       setLoading(false);
     }

@@ -81,7 +81,9 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
     setEditDosage(med.dosage);
     setEditStockCount(String(med.stock_count));
     setEditLowStockThreshold(String(med.low_stock_threshold));
-    setEditFrequencyMode(med.frequency_mode || "interval");
+    const rawMode = med.frequency_mode as string;
+    const mode = rawMode === "specific_time" ? "custom_times" : (rawMode || "interval");
+    setEditFrequencyMode(mode);
     setEditIntervalHours(String(med.interval_hours || 8));
     setEditStartTime(med.start_time || "08:00");
     setEditMealAnchor(med.meal_anchor || "breakfast");
@@ -638,6 +640,17 @@ export const MedicationCabinet: React.FC<CabinetProps> = ({
                 type="number"
                 value={editMealOffsetMinutes}
                 onChange={(e) => setEditMealOffsetMinutes(e.target.value)}
+              />
+            </div>
+          )}
+
+          {(String(editFrequencyMode) === "custom_times" || String(editFrequencyMode) === "specific_time") && (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <Input
+                label={locale === "ar" ? "وقت الجرعة المحددة (الساعة)" : "Specific Dose Time"}
+                type="time"
+                value={editStartTime}
+                onChange={(e) => setEditStartTime(e.target.value)}
               />
             </div>
           )}

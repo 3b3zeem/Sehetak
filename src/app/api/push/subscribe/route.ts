@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-
-  if (authErr || !user) {
-    return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, data: null, message: 'Unauthorized. Please log in first.' },
+        { status: 401 }
+      );
+    }
+
     const { subscription } = await req.json();
 
     if (!subscription || !subscription.endpoint || !subscription.keys) {
@@ -23,7 +24,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const adminClient = createAdminClient();
+
+    const { data, error } = await adminClient
       .from('push_subscriptions')
       .upsert(
         {
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       data,
-      message: 'Web Push subscription saved',
+      message: 'Web Push subscription saved for user',
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>(

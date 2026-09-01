@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { webpush } from "@/lib/push";
@@ -5,6 +7,41 @@ import { ApiResponse } from "@/types";
 
 // In-memory cache to prevent duplicate dispatches within 10 minutes
 const recentDispatches = new Map<string, number>();
+
+function getTodayDoseTimesInMinutes(med: any, profile: any): number[] {
+  const times: number[] = [];
+
+  let breakfastTime = profile?.breakfast_time || "08:00";
+  let lunchTime = profile?.lunch_time || "14:00";
+  let dinnerTime = profile?.dinner_time || "20:00";
+
+  if (med.frequency_mode === "meal_anchored") {
+    let baseTime = breakfastTime;
+    if (med.meal_anchor === "lunch") baseTime = lunchTime;
+    if (med.meal_anchor === "dinner") baseTime = dinnerTime;
+
+    const [h, m] = baseTime.split(":").map(Number);
+    let totalMinutes = (h || 0) * 60 + (m || 0) + (med.meal_offset_minutes || 0);
+    totalMinutes = (totalMinutes + 1440) % 1440;
+    times.push(totalMinutes);
+  } else if (med.frequency_mode === "interval") {
+    const startStr = med.start_time || "08:00";
+    const [sh, sm] = startStr.split(":").map(Number);
+    const startMinutes = (sh || 0) * 60 + (sm || 0);
+    const intervalMins = (med.interval_hours || 8) * 60;
+
+    for (let m = startMinutes % intervalMins; m < 1440; m += intervalMins) {
+      times.push(m);
+    }
+  } else {
+    // custom_times / specific_time
+    const startStr = med.start_time || "08:00";
+    const [sh, sm] = startStr.split(":").map(Number);
+    times.push((sh || 0) * 60 + (sm || 0));
+  }
+
+  return times;
+}
 
 export async function GET() {
   try {
@@ -31,88 +68,90 @@ export async function GET() {
     // 1. Check active medications matching current local time window
     const { data: activeMeds } = await adminClient
       .from("medications")
-      .select("*, profiles(telegram_chat_id, locale)")
+      .select("*, profiles(telegram_chat_id, locale, breakfast_time, lunch_time, dinner_time)")
       .eq("is_active", true);
 
     if (activeMeds && activeMeds.length > 0) {
       for (const med of activeMeds) {
-        if (!med.start_time) continue;
+        const doseTimes = getTodayDoseTimesInMinutes(med, med.profiles);
 
-        const [medH, medM] = med.start_time.split(":").map(Number);
-        const medMinutesSinceMidnight = medH * 60 + medM;
+        for (const targetDoseMinutes of doseTimes) {
+          // Trigger if current time is within [target_time, target_time + 15 minutes]
+          const diffMinutes = currentMinutesSinceMidnight - targetDoseMinutes;
 
-        // Trigger if current time is within [start_time, start_time + 2 minutes]
-        const diffMinutes =
-          currentMinutesSinceMidnight - medMinutesSinceMidnight;
+          if (diffMinutes >= 0 && diffMinutes <= 15) {
+            const dispatchKey = `med_${med.id}_${targetDoseMinutes}_${now.toISOString().substring(0, 10)}`;
+            const lastSent = recentDispatches.get(dispatchKey);
 
-        if (diffMinutes >= 0 && diffMinutes <= 2) {
-          const dispatchKey = `med_${med.id}_${med.start_time.substring(0, 5)}_${now.toISOString().substring(0, 10)}`;
-          const lastSent = recentDispatches.get(dispatchKey);
-
-          // Skip if dispatched today for this exact window
-          if (lastSent && nowMs - lastSent < 10 * 60 * 1000) {
-            continue;
-          }
-
-          recentDispatches.set(dispatchKey, nowMs);
-
-          const isAr = med.profiles?.locale !== "en";
-          const msgText = isAr
-            ? `🔔 تذكير دواء: حان الآن موعد تناول دواء ${med.name} (${med.dosage || "جرعة 1"})`
-            : `🔔 Medication Reminder: It is time to take your medication ${med.name} (${med.dosage || "1 dose"})`;
-
-          // Send Telegram alert if connected
-          if (med.profiles?.telegram_chat_id && botToken) {
-            try {
-              await fetch(
-                `https://api.telegram.org/bot${botToken}/sendMessage`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    chat_id: med.profiles.telegram_chat_id,
-                    text: msgText,
-                  }),
-                },
-              );
-            } catch (err) {
-              console.error("Failed to send Telegram medication reminder", err);
+            // Skip if dispatched today for this exact window
+            if (lastSent && nowMs - lastSent < 10 * 60 * 1000) {
+              continue;
             }
-          }
 
-          // Send Web Push notification if subscribed
-          const { data: subs } = await adminClient
-            .from("push_subscriptions")
-            .select("*")
-            .eq("user_id", med.user_id);
+            recentDispatches.set(dispatchKey, nowMs);
 
-          if (subs) {
-            for (const sub of subs) {
+            const telegramChatId = med.profiles?.telegram_chat_id;
+            const isAr = med.profiles?.locale !== "en";
+
+            const msgText = isAr
+              ? `🔔 تذكير دواء: حان الآن موعد تناول دواء ${med.name} (${med.dosage || "جرعة 1"})`
+              : `🔔 Medication Reminder: It is time to take your medication ${med.name} (${med.dosage || "1 dose"})`;
+
+            // Send Telegram alert if connected
+            if (telegramChatId && botToken) {
               try {
-                await webpush.sendNotification(
+                await fetch(
+                  `https://api.telegram.org/bot${botToken}/sendMessage`,
                   {
-                    endpoint: sub.endpoint,
-                    keys: { p256dh: sub.p256dh, auth: sub.auth },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      chat_id: telegramChatId,
+                      text: msgText,
+                    }),
                   },
-                  JSON.stringify({
-                    title: isAr
-                      ? "صحتك - تذكير الدواء"
-                      : "Sehetak Medication Reminder",
-                    body: msgText,
-                    icon: "/icon.png",
-                    url: "/",
-                  }),
                 );
               } catch (err) {
-                console.error(
-                  "Failed to send Web Push medication notification",
-                  err,
-                );
+                console.error("Failed to send Telegram medication reminder", err);
               }
             }
-          }
 
-          medicationsReminded++;
+            // Send Web Push notification if subscribed
+            if (med.user_id) {
+              const { data: subs } = await adminClient
+                .from("push_subscriptions")
+                .select("*")
+                .eq("user_id", med.user_id);
+
+              if (subs && subs.length > 0) {
+                for (const sub of subs) {
+                  try {
+                    await webpush.sendNotification(
+                      {
+                        endpoint: sub.endpoint,
+                        keys: { p256dh: sub.p256dh, auth: sub.auth },
+                      },
+                      JSON.stringify({
+                        title: isAr
+                          ? "صحتك - تذكير الدواء"
+                          : "Sehetak Medication Reminder",
+                        body: msgText,
+                        icon: "/icon.png",
+                        url: "/",
+                      }),
+                    );
+                  } catch (err) {
+                    console.error(
+                      "Failed to send Web Push medication notification",
+                      err,
+                    );
+                  }
+                }
+              }
+            }
+
+            medicationsReminded++;
+          }
         }
       }
     }
@@ -121,16 +160,15 @@ export async function GET() {
     const { data: appointments } = await adminClient
       .from("doctor_appointments")
       .select("*, profiles(telegram_chat_id, locale)")
-      .eq("notification_sent", false);
+      .or("notification_sent.eq.false,notification_sent.is.null");
 
     if (appointments && appointments.length > 0) {
       for (const appt of appointments) {
         const apptTime = new Date(appt.appointment_date).getTime();
         const remindMinutes = appt.remind_before_minutes || 30;
-        const remindTimeStart = apptTime - remindMinutes * 60 * 1000;
-        const remindTimeEnd = apptTime + 5 * 60 * 1000; // allow up to 5 min past appointment start
+        const remindTimeStart = apptTime - (remindMinutes + 2) * 60 * 1000;
+        const remindTimeEnd = apptTime + 5 * 60 * 1000;
 
-        // If the appointment time has already passed (> 5 minutes ago), mark as sent without sending expired notification
         if (nowMs > remindTimeEnd) {
           await adminClient
             .from("doctor_appointments")
@@ -139,9 +177,10 @@ export async function GET() {
           continue;
         }
 
-        // Only dispatch if current time is within designated reminder window: [appt_time - remind_minutes, appt_time + 5min]
         if (nowMs >= remindTimeStart && nowMs <= remindTimeEnd) {
+          const telegramChatId = appt.profiles?.telegram_chat_id;
           const isAr = appt.profiles?.locale !== "en";
+
           const apptTimeFormatted = new Date(
             appt.appointment_date,
           ).toLocaleTimeString(isAr ? "ar-EG" : "en-US", {
@@ -155,7 +194,7 @@ export async function GET() {
             : `🩺 Doctor Appointment Reminder: Visit with Dr. ${appt.doctor_name} (${appt.specialty || "Doctor"}) at ${apptTimeFormatted} (Reminder ${remindMinutes}m before)`;
 
           // Send Telegram
-          if (appt.profiles?.telegram_chat_id && botToken) {
+          if (telegramChatId && botToken) {
             try {
               await fetch(
                 `https://api.telegram.org/bot${botToken}/sendMessage`,
@@ -163,7 +202,7 @@ export async function GET() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
-                    chat_id: appt.profiles.telegram_chat_id,
+                    chat_id: telegramChatId,
                     text: msgText,
                   }),
                 },
@@ -177,35 +216,36 @@ export async function GET() {
           }
 
           // Send Web Push
-          const { data: subs } = await adminClient
-            .from("push_subscriptions")
-            .select("*")
-            .eq("user_id", appt.user_id);
+          if (appt.user_id) {
+            const { data: subs } = await adminClient
+              .from("push_subscriptions")
+              .select("*")
+              .eq("user_id", appt.user_id);
 
-          if (subs) {
-            for (const sub of subs) {
-              try {
-                await webpush.sendNotification(
-                  {
-                    endpoint: sub.endpoint,
-                    keys: { p256dh: sub.p256dh, auth: sub.auth },
-                  },
-                  JSON.stringify({
-                    title: isAr
-                      ? "صحتك - موعد طبي"
-                      : "Doctor Appointment Reminder",
-                    body: msgText,
-                    icon: "/icon.png",
-                    url: "/",
-                  }),
-                );
-              } catch (err) {
-                console.error("Failed to send push notification", err);
+            if (subs && subs.length > 0) {
+              for (const sub of subs) {
+                try {
+                  await webpush.sendNotification(
+                    {
+                      endpoint: sub.endpoint,
+                      keys: { p256dh: sub.p256dh, auth: sub.auth },
+                    },
+                    JSON.stringify({
+                      title: isAr
+                        ? "صحتك - موعد طبي"
+                        : "Doctor Appointment Reminder",
+                      body: msgText,
+                      icon: "/icon.png",
+                      url: "/",
+                    }),
+                  );
+                } catch (err) {
+                  console.error("Failed to send push notification", err);
+                }
               }
             }
           }
 
-          // Mark notification as sent so it never triggers again
           await adminClient
             .from("doctor_appointments")
             .update({ notification_sent: true })

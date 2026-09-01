@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
 
-  const { data, error } = await supabase
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from('medications')
     .select('*')
     .eq('user_id', user.id)
@@ -35,11 +37,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
@@ -73,28 +75,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const adminClient = createAdminClient();
+
+    const insertPayload: any = {
+      user_id: user.id,
+      name,
+      med_type,
+      dosage,
+      frequency_mode,
+      interval_hours: interval_hours ? parseInt(interval_hours, 10) : null,
+      start_time,
+      meal_anchor,
+      meal_offset_minutes: meal_offset_minutes ? parseInt(meal_offset_minutes, 10) : 30,
+      stock_count: stock_count ? parseInt(stock_count, 10) : 0,
+      low_stock_threshold: low_stock_threshold ? parseInt(low_stock_threshold, 10) : 5,
+      notes,
+      pharmacy_name,
+      pharmacy_phone,
+      image_url,
+      pill_color,
+      pill_shape,
+      pill_size,
+    };
+
+    const { data, error } = await adminClient
       .from('medications')
-      .insert({
-        user_id: user.id,
-        name,
-        med_type,
-        dosage,
-        frequency_mode,
-        interval_hours: interval_hours ? parseInt(interval_hours, 10) : null,
-        start_time,
-        meal_anchor,
-        meal_offset_minutes: meal_offset_minutes ? parseInt(meal_offset_minutes, 10) : 30,
-        stock_count: stock_count ? parseInt(stock_count, 10) : 0,
-        low_stock_threshold: low_stock_threshold ? parseInt(low_stock_threshold, 10) : 5,
-        notes,
-        pharmacy_name,
-        pharmacy_phone,
-        image_url,
-        pill_color,
-        pill_shape,
-        pill_size,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 

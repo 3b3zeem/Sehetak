@@ -33,8 +33,15 @@ export function useDailyTimeline() {
       })
       .subscribe();
 
+    // Periodically evaluate and dispatch background reminders (Web Push & Telegram) every 30s
+    fetch('/api/cron/dispatch-reminders').catch(() => {});
+    const interval = setInterval(() => {
+      fetch('/api/cron/dispatch-reminders').catch(() => {});
+    }, 30 * 1000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [queryClient, supabase]);
 

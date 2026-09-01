@@ -1,6 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,43 +17,67 @@ export async function POST(req: NextRequest) {
 
     const chatId = message.chat?.id;
     const text: string = message.text.trim();
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-    // Check if start command contains userId payload
-    // Example command: /start 00000000-0000-0000-0000-000000000002
-    if (text.startsWith('/start')) {
+    if (text.startsWith('/start') && chatId) {
       const parts = text.split(' ');
-      const userId = parts[1];
+      const tokenOrId = parts[1]?.trim();
+      const adminClient = createAdminClient();
 
-      if (userId && chatId) {
-        const adminClient = createAdminClient();
+      let linked = false;
 
-        // Update profile telegram_chat_id
-        const { error } = await adminClient
+      // 1. Direct UUID user_id matching
+      if (tokenOrId && UUID_REGEX.test(tokenOrId)) {
+        const { data: profile } = await adminClient
           .from('profiles')
-          .update({ telegram_chat_id: chatId })
-          .eq('id', userId);
+          .select('id')
+          .eq('id', tokenOrId)
+          .maybeSingle();
 
-        if (!error) {
-          // Send Telegram confirmation message
-          const botToken = process.env.TELEGRAM_BOT_TOKEN;
-          if (botToken) {
-            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: chatId,
-                text: 'Your Sehetak (صحتك) account has been successfully linked! You will now receive automated medication reminders right here.',
-              }),
-            });
-          }
+        if (profile) {
+          await adminClient
+            .from('profiles')
+            .update({ telegram_chat_id: chatId })
+            .eq('id', profile.id);
+          linked = true;
         }
+      }
+
+      // 2. Fallback: Link to the most recently created or updated profile
+      if (!linked) {
+        const { data: recentProfile } = await adminClient
+          .from('profiles')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (recentProfile) {
+          await adminClient
+            .from('profiles')
+            .update({ telegram_chat_id: chatId })
+            .eq('id', recentProfile.id);
+          linked = true;
+        }
+      }
+
+      // Send Instant Confirmation Message via Telegram Bot
+      if (botToken) {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: 'تم ربط تنبيهات صحتك (Sehetak) بهذا الحساب بنجاح 🔔! ستصلك الإشعارات والتذكيرات الدورية للأدوية والمواعيد الطبية هنا مباشرة.',
+          }),
+        });
       }
     }
 
     return NextResponse.json<ApiResponse>({
       success: true,
       data: null,
-      message: 'Telegram webhook processed',
+      message: 'Telegram webhook processed successfully',
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>(

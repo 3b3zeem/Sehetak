@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
+
+  const adminClient = createAdminClient();
 
   try {
     const formData = await req.formData();
@@ -36,8 +39,8 @@ export async function POST(req: NextRequest) {
     const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Upload to Supabase Storage bucket 'prescriptions'
-    const { data: storageData, error: uploadErr } = await supabase.storage
+    // Upload to Supabase Storage bucket 'prescriptions' using adminClient
+    const { data: storageData, error: uploadErr } = await adminClient.storage
       .from('prescriptions')
       .upload(fileName, buffer, {
         contentType: file.type,
@@ -45,7 +48,6 @@ export async function POST(req: NextRequest) {
       });
 
     if (uploadErr) {
-      // If bucket does not exist, return base64 data URL so user upload never fails
       const base64 = buffer.toString('base64');
       const dataUrl = `data:${file.type};base64,${base64}`;
       return NextResponse.json<ApiResponse>({
@@ -55,8 +57,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = adminClient.storage
       .from('prescriptions')
       .getPublicUrl(storageData.path);
 

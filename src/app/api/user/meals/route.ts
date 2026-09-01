@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
 
+  const adminClient = createAdminClient();
   const todayStr = new Date().toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('daily_meal_logs')
     .select('*')
     .eq('patient_id', user.id)
@@ -38,14 +40,16 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
+
+  const adminClient = createAdminClient();
 
   try {
     const { meal_type } = await req.json();
@@ -60,15 +64,17 @@ export async function POST(req: NextRequest) {
     const todayStr = new Date().toISOString().split('T')[0];
     const nowTimeStr = new Date().toTimeString().slice(0, 8);
 
+    const insertPayload = {
+      patient_id: user.id,
+      meal_type,
+      logged_at: new Date().toISOString(),
+      date: todayStr,
+    };
+
     // 1. Insert daily meal log
-    const { data: mealLog, error: mealErr } = await supabase
+    const { data: mealLog, error: mealErr } = await adminClient
       .from('daily_meal_logs')
-      .insert({
-        patient_id: user.id,
-        meal_type,
-        logged_at: new Date().toISOString(),
-        date: todayStr,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
@@ -79,13 +85,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Dynamically update profile baseline meal time to automatically adjust meal-anchored medication schedules
+    // 2. Dynamically update profile baseline meal time
     const profileUpdate: { breakfast_time?: string; lunch_time?: string; dinner_time?: string } = {};
     if (meal_type === 'breakfast') profileUpdate.breakfast_time = nowTimeStr;
     if (meal_type === 'lunch') profileUpdate.lunch_time = nowTimeStr;
     if (meal_type === 'dinner') profileUpdate.dinner_time = nowTimeStr;
 
-    await supabase
+    await adminClient
       .from('profiles')
       .update(profileUpdate)
       .eq('id', user.id);

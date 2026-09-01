@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
 
-  const { data, error } = await supabase
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from('doctor_appointments')
     .select('*')
     .eq('user_id', user.id)
@@ -35,11 +37,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
@@ -65,21 +67,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const adminClient = createAdminClient();
+
+    const insertPayload: any = {
+      user_id: user.id,
+      doctor_name,
+      specialty,
+      clinic_name,
+      clinic_location,
+      appointment_date,
+      is_followup,
+      remind_before_minutes: parseInt(remind_before_minutes, 10) || 30,
+      notes,
+      report_url,
+      notification_sent: false,
+    };
+
+    const { data, error } = await adminClient
       .from('doctor_appointments')
-      .insert({
-        user_id: user.id,
-        doctor_name,
-        specialty,
-        clinic_name,
-        clinic_location,
-        appointment_date,
-        is_followup,
-        remind_before_minutes: parseInt(remind_before_minutes, 10) || 30,
-        notes,
-        report_url,
-        notification_sent: false,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 

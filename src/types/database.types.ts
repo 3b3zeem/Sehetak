@@ -14,6 +14,50 @@ export type LogStatus = 'taken' | 'skipped' | 'pending';
 export interface Database {
   public: {
     Tables: {
+      guest_sessions: {
+        Row: {
+          id: string;
+          guest_device_id: string;
+          telegram_chat_id: number | null;
+          telegram_temp_token: string | null;
+          telegram_temp_token_expires_at: string | null;
+          magic_login_token: string | null;
+          user_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          guest_device_id: string;
+          telegram_chat_id?: number | null;
+          telegram_temp_token?: string | null;
+          telegram_temp_token_expires_at?: string | null;
+          magic_login_token?: string | null;
+          user_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          guest_device_id?: string;
+          telegram_chat_id?: number | null;
+          telegram_temp_token?: string | null;
+          telegram_temp_token_expires_at?: string | null;
+          magic_login_token?: string | null;
+          user_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'guest_sessions_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       profiles: {
         Row: {
           id: string;
@@ -59,7 +103,8 @@ export interface Database {
       medications: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
+          guest_device_id: string | null;
           name: string;
           med_type: MedicationType;
           dosage: string;
@@ -82,7 +127,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           name: string;
           med_type?: MedicationType;
           dosage: string;
@@ -105,7 +151,8 @@ export interface Database {
         };
         Update: {
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           name?: string;
           med_type?: MedicationType;
           dosage?: string;
@@ -139,21 +186,24 @@ export interface Database {
       daily_meal_logs: {
         Row: {
           id: string;
-          patient_id: string;
+          patient_id: string | null;
+          guest_device_id: string | null;
           meal_type: 'breakfast' | 'lunch' | 'dinner';
           logged_at: string;
           date: string;
         };
         Insert: {
           id?: string;
-          patient_id: string;
+          patient_id?: string | null;
+          guest_device_id?: string | null;
           meal_type: 'breakfast' | 'lunch' | 'dinner';
           logged_at?: string;
           date?: string;
         };
         Update: {
           id?: string;
-          patient_id?: string;
+          patient_id?: string | null;
+          guest_device_id?: string | null;
           meal_type?: 'breakfast' | 'lunch' | 'dinner';
           logged_at?: string;
           date?: string;
@@ -172,7 +222,8 @@ export interface Database {
         Row: {
           id: string;
           medication_id: string;
-          user_id: string;
+          user_id: string | null;
+          guest_device_id: string | null;
           scheduled_for: string;
           taken_at: string | null;
           status: LogStatus;
@@ -182,7 +233,8 @@ export interface Database {
         Insert: {
           id?: string;
           medication_id: string;
-          user_id: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           scheduled_for: string;
           taken_at?: string | null;
           status?: LogStatus;
@@ -192,7 +244,8 @@ export interface Database {
         Update: {
           id?: string;
           medication_id?: string;
-          user_id?: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           scheduled_for?: string;
           taken_at?: string | null;
           status?: LogStatus;
@@ -276,7 +329,8 @@ export interface Database {
       doctor_appointments: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
+          guest_device_id: string | null;
           doctor_name: string;
           specialty: string | null;
           clinic_name: string | null;
@@ -291,7 +345,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           doctor_name: string;
           specialty?: string | null;
           clinic_name?: string | null;
@@ -306,7 +361,8 @@ export interface Database {
         };
         Update: {
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           doctor_name?: string;
           specialty?: string | null;
           clinic_name?: string | null;
@@ -332,7 +388,8 @@ export interface Database {
       push_subscriptions: {
         Row: {
           id: string;
-          user_id: string;
+          user_id: string | null;
+          guest_device_id: string | null;
           endpoint: string;
           p256dh: string;
           auth: string;
@@ -340,7 +397,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          user_id: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           endpoint: string;
           p256dh: string;
           auth: string;
@@ -348,7 +406,8 @@ export interface Database {
         };
         Update: {
           id?: string;
-          user_id?: string;
+          user_id?: string | null;
+          guest_device_id?: string | null;
           endpoint?: string;
           p256dh?: string;
           auth?: string;

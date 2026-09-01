@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
-      { success: false, data: null, message: 'Unauthorized' },
+      { success: false, data: null, message: 'Unauthorized. Please log in first.' },
       { status: 401 }
     );
   }
@@ -16,7 +17,8 @@ export async function POST(req: NextRequest) {
   try {
     const { breakfast_time, lunch_time, dinner_time } = await req.json();
 
-    const { data, error } = await supabase
+    const adminClient = createAdminClient();
+    const { data, error } = await adminClient
       .from('profiles')
       .update({
         breakfast_time,

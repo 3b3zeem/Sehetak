@@ -28,25 +28,23 @@ export const NavMenu: React.FC<NavMenuProps> = ({
   // Link definitions
   const links = [
     { href: `/${locale}`, label: dict.nav?.home, icon: <Home className="w-4 h-4" />, exact: true },
-    { href: `/${locale}/about`, label: dict.nav?.about, icon: <Info className="w-4 h-4" /> },
-    { href: `/${locale}/contact`, label: dict.nav?.contact, icon: <Mail className="w-4 h-4" /> },
-  ];
-
-  if (userProfile) {
-    links.push({
+    {
       href: dashboardPath,
       label: dict.nav?.dashboard,
       icon: <User className="w-4 h-4" />,
       exact: false,
+    },
+    { href: `/${locale}/about`, label: dict.nav?.about, icon: <Info className="w-4 h-4" /> },
+    { href: `/${locale}/contact`, label: dict.nav?.contact, icon: <Mail className="w-4 h-4" /> },
+  ];
+
+  if (userProfile?.role === 'admin') {
+    links.push({
+      href: `/${locale}/dashboard/admin`,
+      label: dict.nav?.admin,
+      icon: <Shield className="w-4 h-4" />,
+      exact: false,
     });
-    if (userProfile.role === 'admin') {
-      links.push({
-        href: `/${locale}/dashboard/admin`,
-        label: dict.nav?.admin,
-        icon: <Shield className="w-4 h-4" />,
-        exact: false,
-      });
-    }
   }
 
   // Helper to check active route cleanly

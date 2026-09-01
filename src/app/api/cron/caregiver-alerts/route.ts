@@ -35,6 +35,7 @@ export async function GET(request: Request) {
     let notificationsSent = 0;
 
     for (const log of missedLogs) {
+      if (!log.user_id) continue;
       const patientId = log.user_id;
       const patientName = (log.profiles as any)?.full_name || 'Relative';
       const medName = (log.medications as any)?.name || 'Medication';

@@ -37,9 +37,9 @@ export async function updateSession(request: NextRequest) {
 
   // Extract locale from path
   const segments = pathname.split('/').filter(Boolean);
-  const locale = segments[0] === 'ar' || segments[0] === 'en' ? segments[0] : 'en';
+  const locale = segments[0] === 'ar' || segments[0] === 'en' ? segments[0] : 'ar';
 
-  // Check path patterns strictly using URL segments to prevent infinite redirect loops
+  // Check path patterns strictly using URL segments
   const isAuthPage =
     segments[1] === 'login' ||
     segments[1] === 'register' ||
@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
       .from('profiles')
       .select('username, role')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     const username = profile?.username || user.email?.split('@')[0] || 'patient';
     const role = profile?.role || 'patient';
@@ -77,20 +77,23 @@ export async function updateSession(request: NextRequest) {
 
     // Dynamic Patient Dashboard Guard ([username] check)
     if (isDashboardPage && !isAdminPage) {
-      // Find segment after /dashboard/
       const dashIndex = segments.indexOf('dashboard');
       if (dashIndex !== -1 && segments[dashIndex + 1]) {
         const urlUsername = segments[dashIndex + 1];
-        if (urlUsername !== username) {
-          // Replace mismatched username with the logged in user's username
+        // If logged-in user is accessing wrong username or 'guest', redirect to their personalized username dashboard
+        if (urlUsername === 'guest' || (urlUsername !== username && urlUsername !== 'admin')) {
           segments[dashIndex + 1] = username;
           const correctedPath = `/${segments.join('/')}`;
           return NextResponse.redirect(new URL(correctedPath, request.url));
         }
+      } else if (dashIndex !== -1 && !segments[dashIndex + 1]) {
+        // Accessing root /dashboard, redirect to /dashboard/[username]
+        const targetUrl = new URL(`/${locale}/dashboard/${username}`, request.url);
+        return NextResponse.redirect(targetUrl);
       }
     }
   } else {
-    // Unauthenticated user trying to access protected dashboard routes
+    // Unauthenticated Users trying to access any dashboard route MUST be redirected to login
     if (isDashboardPage) {
       const loginUrl = new URL(`/${locale}/login`, request.url);
       return NextResponse.redirect(loginUrl);

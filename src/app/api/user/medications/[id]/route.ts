@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { ApiResponse } from '@/types';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
       { success: false, data: null, message: 'Unauthorized' },
       { status: 401 }
     );
   }
 
+  const adminClient = createAdminClient();
+
   try {
     const body = await req.json();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
       .from('medications')
       .update(body)
       .eq('id', id)
@@ -48,16 +51,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authErr || !user) {
+  if (!user) {
     return NextResponse.json<ApiResponse>(
       { success: false, data: null, message: 'Unauthorized' },
       { status: 401 }
     );
   }
 
-  const { error } = await supabase
+  const adminClient = createAdminClient();
+
+  const { error } = await adminClient
     .from('medications')
     .delete()
     .eq('id', id)

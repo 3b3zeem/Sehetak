@@ -72,6 +72,12 @@ export interface Database {
           low_stock_threshold: number;
           is_active: boolean;
           notes: string | null;
+          pharmacy_name: string | null;
+          pharmacy_phone: string | null;
+          image_url: string | null;
+          pill_color: string | null;
+          pill_shape: string | null;
+          pill_size: string | null;
           created_at: string;
         };
         Insert: {
@@ -89,6 +95,12 @@ export interface Database {
           low_stock_threshold?: number;
           is_active?: boolean;
           notes?: string | null;
+          pharmacy_name?: string | null;
+          pharmacy_phone?: string | null;
+          image_url?: string | null;
+          pill_color?: string | null;
+          pill_shape?: string | null;
+          pill_size?: string | null;
           created_at?: string;
         };
         Update: {
@@ -106,12 +118,50 @@ export interface Database {
           low_stock_threshold?: number;
           is_active?: boolean;
           notes?: string | null;
+          pharmacy_name?: string | null;
+          pharmacy_phone?: string | null;
+          image_url?: string | null;
+          pill_color?: string | null;
+          pill_shape?: string | null;
+          pill_size?: string | null;
           created_at?: string;
         };
         Relationships: [
           {
             foreignKeyName: 'medications_user_id_fkey';
             columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      daily_meal_logs: {
+        Row: {
+          id: string;
+          patient_id: string;
+          meal_type: 'breakfast' | 'lunch' | 'dinner';
+          logged_at: string;
+          date: string;
+        };
+        Insert: {
+          id?: string;
+          patient_id: string;
+          meal_type: 'breakfast' | 'lunch' | 'dinner';
+          logged_at?: string;
+          date?: string;
+        };
+        Update: {
+          id?: string;
+          patient_id?: string;
+          meal_type?: 'breakfast' | 'lunch' | 'dinner';
+          logged_at?: string;
+          date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'daily_meal_logs_patient_id_fkey';
+            columns: ['patient_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];

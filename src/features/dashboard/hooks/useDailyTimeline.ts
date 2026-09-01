@@ -22,9 +22,14 @@ export function useDailyTimeline() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'medication_logs' }, () => {
         queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'daily_meal_logs' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
+        queryClient.invalidateQueries({ queryKey: ['dailyMealLogs'] });
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
         queryClient.invalidateQueries({ queryKey: ['authenticated-home-user'] });
         queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['dailyDoses'] });
       })
       .subscribe();
 
@@ -38,6 +43,25 @@ export function useDailyTimeline() {
     staleTime: 0,
     refetchOnWindowFocus: true,
     queryFn: async (): Promise<{ doses: CalculatedDoseItem[]; adherenceScore: number }> => {
+      // Fetch user profile for baseline meal times
+      const { data: { user } } = await supabase.auth.getUser();
+      let breakfastTime = '08:00';
+      let lunchTime = '14:00';
+      let dinnerTime = '20:00';
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('breakfast_time, lunch_time, dinner_time')
+          .eq('id', user.id)
+          .single();
+        if (profile) {
+          if (profile.breakfast_time) breakfastTime = profile.breakfast_time;
+          if (profile.lunch_time) lunchTime = profile.lunch_time;
+          if (profile.dinner_time) dinnerTime = profile.dinner_time;
+        }
+      }
+
       // Fetch medications
       const resMeds = await fetch('/api/user/medications');
       const jsonMeds: ApiResponse<MedicationRow[]> = await resMeds.json();
@@ -52,9 +76,16 @@ export function useDailyTimeline() {
         const scheduledDate = new Date();
 
         if (m.frequency_mode === 'meal_anchored') {
-          if (m.meal_anchor === 'lunch') scheduledDate.setHours(14, 0, 0, 0);
-          else if (m.meal_anchor === 'dinner') scheduledDate.setHours(20, 0, 0, 0);
-          else scheduledDate.setHours(8, 0, 0, 0);
+          let baseMealTime = breakfastTime;
+          if (m.meal_anchor === 'lunch') baseMealTime = lunchTime;
+          if (m.meal_anchor === 'dinner') baseMealTime = dinnerTime;
+
+          const [mh, mm] = baseMealTime.split(':').map(Number);
+          scheduledDate.setHours(mh || 8, mm || 0, 0, 0);
+
+          if (m.meal_offset_minutes) {
+            scheduledDate.setMinutes(scheduledDate.getMinutes() + m.meal_offset_minutes);
+          }
         } else if (m.start_time) {
           const [sh, sm] = m.start_time.split(':');
           const hours = parseInt(sh, 10) || 8;
@@ -85,6 +116,12 @@ export function useDailyTimeline() {
           status,
           stock_count: m.stock_count,
           low_stock_threshold: m.low_stock_threshold,
+          pharmacy_phone: m.pharmacy_phone,
+          pharmacy_name: m.pharmacy_name,
+          image_url: m.image_url,
+          pill_color: m.pill_color,
+          pill_shape: m.pill_shape,
+          pill_size: m.pill_size,
           notes: m.notes,
         };
       });

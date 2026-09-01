@@ -13,11 +13,14 @@ export async function GET() {
     );
   }
 
+  const todayStr = new Date().toISOString().split('T')[0];
+
   const { data, error } = await supabase
-    .from('medications')
+    .from('daily_meal_logs')
     .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .eq('patient_id', user.id)
+    .eq('date', todayStr)
+    .order('logged_at', { ascending: false });
 
   if (error) {
     return NextResponse.json<ApiResponse>(
@@ -29,7 +32,7 @@ export async function GET() {
   return NextResponse.json<ApiResponse>({
     success: true,
     data,
-    message: 'Medications retrieved successfully',
+    message: 'Meal logs retrieved successfully',
   });
 }
 
@@ -45,70 +48,52 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
-    const {
-      name,
-      med_type = 'pill',
-      dosage,
-      frequency_mode,
-      interval_hours,
-      start_time,
-      meal_anchor,
-      meal_offset_minutes = 30,
-      stock_count = 0,
-      low_stock_threshold = 5,
-      notes,
-      pharmacy_name,
-      pharmacy_phone,
-      image_url,
-      pill_color,
-      pill_shape,
-      pill_size,
-    } = body;
+    const { meal_type } = await req.json();
 
-    if (!name || !dosage || !frequency_mode) {
+    if (!meal_type || !['breakfast', 'lunch', 'dinner'].includes(meal_type)) {
       return NextResponse.json<ApiResponse>(
-        { success: false, data: null, message: 'Missing required medication fields' },
+        { success: false, data: null, message: 'Invalid meal_type' },
         { status: 400 }
       );
     }
 
-    const { data, error } = await supabase
-      .from('medications')
+    const todayStr = new Date().toISOString().split('T')[0];
+    const nowTimeStr = new Date().toTimeString().slice(0, 8);
+
+    // 1. Insert daily meal log
+    const { data: mealLog, error: mealErr } = await supabase
+      .from('daily_meal_logs')
       .insert({
-        user_id: user.id,
-        name,
-        med_type,
-        dosage,
-        frequency_mode,
-        interval_hours: interval_hours ? parseInt(interval_hours, 10) : null,
-        start_time,
-        meal_anchor,
-        meal_offset_minutes: meal_offset_minutes ? parseInt(meal_offset_minutes, 10) : 30,
-        stock_count: stock_count ? parseInt(stock_count, 10) : 0,
-        low_stock_threshold: low_stock_threshold ? parseInt(low_stock_threshold, 10) : 5,
-        notes,
-        pharmacy_name,
-        pharmacy_phone,
-        image_url,
-        pill_color,
-        pill_shape,
-        pill_size,
+        patient_id: user.id,
+        meal_type,
+        logged_at: new Date().toISOString(),
+        date: todayStr,
       })
       .select()
       .single();
 
-    if (error) {
+    if (mealErr) {
       return NextResponse.json<ApiResponse>(
-        { success: false, data: null, message: error.message },
+        { success: false, data: null, message: mealErr.message },
         { status: 500 }
       );
     }
 
+    // 2. Dynamically update profile baseline meal time to automatically adjust meal-anchored medication schedules
+    const profileUpdate: { breakfast_time?: string; lunch_time?: string; dinner_time?: string } = {};
+    if (meal_type === 'breakfast') profileUpdate.breakfast_time = nowTimeStr;
+    if (meal_type === 'lunch') profileUpdate.lunch_time = nowTimeStr;
+    if (meal_type === 'dinner') profileUpdate.dinner_time = nowTimeStr;
+
+    await supabase
+      .from('profiles')
+      .update(profileUpdate)
+      .eq('id', user.id);
+
     return NextResponse.json<ApiResponse>({
       success: true,
-      data,
-      message: 'Medication added successfully',
+      data: mealLog,
+      message: 'Meal logged successfully',
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>(

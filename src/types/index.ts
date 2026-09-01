@@ -23,6 +23,7 @@ export type DoctorAppointmentInsert = Database['public']['Tables']['doctor_appoi
 export type DoctorAppointmentUpdate = Database['public']['Tables']['doctor_appointments']['Update'];
 
 export type PushSubscriptionRow = Database['public']['Tables']['push_subscriptions']['Row'];
+export type DailyMealLogRow = Database['public']['Tables']['daily_meal_logs']['Row'];
 
 export interface CalculatedDoseItem {
   id: string; // log id or computed dose id
@@ -35,6 +36,12 @@ export interface CalculatedDoseItem {
   notes?: string | null;
   stock_count: number;
   low_stock_threshold: number;
+  pharmacy_phone?: string | null;
+  pharmacy_name?: string | null;
+  image_url?: string | null;
+  pill_color?: string | null;
+  pill_shape?: string | null;
+  pill_size?: string | null;
   taken_at?: string | null;
 }
 

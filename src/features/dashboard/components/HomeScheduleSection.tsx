@@ -15,8 +15,6 @@ import {
   Clock,
   Sparkles,
   Utensils,
-  ChevronLeft,
-  ChevronRight,
   Sliders,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,7 +59,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
       <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 p-8 text-center text-slate-400 space-y-3 shadow-sm">
         <div className="w-10 h-10 border-4 border-[#008080] border-t-transparent rounded-full animate-spin mx-auto" />
         <p className="text-xs font-semibold">
-          {isAr ? "جاري تحميل جدول الأدویة..." : "Loading schedule..."}
+          {isAr ? "جاري تحميل جدول الأدوية..." : "Loading schedule..."}
         </p>
       </div>
     );
@@ -110,11 +108,11 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
             >
               <Button
                 size="sm"
-                className="w-full sm:w-auto gap-2 bg-[#0088cc] hover:bg-[#0077b3] text-white font-bold rounded-xl px-5 py-2.5 shadow-md shadow-[#0088cc]/20"
+                className="w-full sm:w-auto gap-2 bg-[#0088cc] hover:bg-[#0077b3] text-white font-bold rounded-xl px-5 py-2.5 shadow-md shadow-[#0088cc]/20 cursor-pointer"
               >
                 <Send className="w-4 h-4" />
                 <span>
-                  {isAr ? "ربط التليجرام الآن 🚀" : "Connect Telegram Now 🚀"}
+                  {isAr ? "ربط التليجرام الآن" : "Connect Telegram Now"}
                 </span>
               </Button>
             </a>
@@ -184,7 +182,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
             </div>
             <h3 className="font-extrabold text-slate-900 text-lg sm:text-xl">
               {isAr
-                ? "معاينة جدول الأدویة اليومي"
+                ? "معاينة جدول الأدوية اليومي"
                 : "Daily Medication Timeline Preview"}
             </h3>
           </div>
@@ -213,7 +211,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
               {isAr ? "تجربة التعديل الديناميكي:" : "Dynamic Shift Demo:"}
             </strong>{" "}
             {isAr
-              ? "غير وقت الإفطار اليوم لتشاهد كيف تتعدل مواعيد الأدویة المرتبطة بها تلقائياً!"
+              ? "غير وقت الإفطار اليوم لتشاهد كيف تتعدل مواعيد الأدوية المرتبطة بها تلقائياً!"
               : "Shift your breakfast time to see medication schedules dynamically adjust!"}
           </span>
         </div>
@@ -223,7 +221,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
           <button
             type="button"
             onClick={() => setMealShiftMinutes((prev) => Math.max(-60, prev - 30))}
-            className="px-2.5 py-1 bg-white hover:bg-teal-100 text-[#008080] font-bold rounded-lg border border-teal-200 transition-colors"
+            className="px-2.5 py-1 bg-white hover:bg-teal-100 text-[#008080] font-bold rounded-lg border border-teal-200 transition-colors cursor-pointer"
           >
             -30 {isAr ? "دقيقة" : "min"}
           </button>
@@ -237,7 +235,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
           <button
             type="button"
             onClick={() => setMealShiftMinutes((prev) => Math.min(120, prev + 30))}
-            className="px-2.5 py-1 bg-white hover:bg-teal-100 text-[#008080] font-bold rounded-lg border border-teal-200 transition-colors"
+            className="px-2.5 py-1 bg-white hover:bg-teal-100 text-[#008080] font-bold rounded-lg border border-teal-200 transition-colors cursor-pointer"
           >
             +30 {isAr ? "دقيقة" : "min"}
           </button>
@@ -274,7 +272,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
                 {isAr ? "جلوكوفاج 850mg" : "Glucophage 850mg"}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
-                {isAr ? "تم تناولها ✅" : "Taken ✅"}
+                {isAr ? "تم التناول" : "Taken"}
               </span>
             </div>
             <p className="text-xs text-slate-500 flex items-center gap-1">
@@ -312,7 +310,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
                 {isAr ? "أملوديبين (دواء الضغط)" : "Amlodipine 5mg"}
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
-                {isAr ? "تم تناولها ✅" : "Taken ✅"}
+                {isAr ? "تم التناول" : "Taken"}
               </span>
             </div>
             <p className="text-xs text-slate-500 flex items-center gap-1">
@@ -351,7 +349,7 @@ export const HomeScheduleSection: React.FC<HomeScheduleSectionProps> = ({
         <Link href={`/${locale}/register`}>
           <Button
             size="lg"
-            className="gap-2 bg-[#008080] hover:bg-[#006666] text-white font-bold rounded-xl shadow-md px-6"
+            className="gap-2 bg-[#008080] hover:bg-[#006666] text-white font-bold rounded-xl shadow-md px-6 cursor-pointer"
           >
             <span>
               {isAr

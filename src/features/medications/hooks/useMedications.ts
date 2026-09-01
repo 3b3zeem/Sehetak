@@ -1,7 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MedicationRow, ApiResponse } from '@/types';
+import { MedicationRow } from '@/types';
+import { medicationService } from '../services/medicationService';
 import { toast } from 'sonner';
 
 export function useMedications() {
@@ -10,8 +11,7 @@ export function useMedications() {
   const medicationsQuery = useQuery({
     queryKey: ['medications'],
     queryFn: async (): Promise<MedicationRow[]> => {
-      const res = await fetch('/api/user/medications');
-      const json: ApiResponse<MedicationRow[]> = await res.json();
+      const json = await medicationService.getMedications();
       if (!json.success) throw new Error(json.message || 'Failed to fetch medications');
       return json.data || [];
     },
@@ -19,12 +19,7 @@ export function useMedications() {
 
   const addMedicationMutation = useMutation({
     mutationFn: async (newMed: Partial<MedicationRow>) => {
-      const res = await fetch('/api/user/medications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMed),
-      });
-      const json: ApiResponse<MedicationRow> = await res.json();
+      const json = await medicationService.addMedication(newMed);
       if (!json.success) throw new Error(json.message || 'Failed to add medication');
       return json.data;
     },
@@ -40,12 +35,7 @@ export function useMedications() {
 
   const updateMedicationMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<MedicationRow> }) => {
-      const res = await fetch(`/api/user/medications/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const json: ApiResponse<MedicationRow> = await res.json();
+      const json = await medicationService.updateMedication(id, data);
       if (!json.success) throw new Error(json.message || 'Failed to update medication');
       return json.data;
     },
@@ -61,8 +51,7 @@ export function useMedications() {
 
   const deleteMedicationMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/user/medications/${id}`, { method: 'DELETE' });
-      const json: ApiResponse = await res.json();
+      const json = await medicationService.deleteMedication(id);
       if (!json.success) throw new Error(json.message || 'Failed to delete medication');
       return id;
     },
@@ -76,6 +65,17 @@ export function useMedications() {
     },
   });
 
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const json = await medicationService.uploadPhoto(file);
+      if (!json.success || !json.data) throw new Error(json.message || 'Failed to upload photo');
+      return json.data.url;
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to upload photo');
+    },
+  });
+
   return {
     medications: medicationsQuery.data || [],
     isLoading: medicationsQuery.isLoading,
@@ -84,7 +84,9 @@ export function useMedications() {
     addMedication: addMedicationMutation.mutateAsync,
     updateMedication: updateMedicationMutation.mutateAsync,
     deleteMedication: deleteMedicationMutation.mutateAsync,
+    uploadPhoto: uploadPhotoMutation.mutateAsync,
     isAdding: addMedicationMutation.isPending,
     isUpdating: updateMedicationMutation.isPending,
+    isUploading: uploadPhotoMutation.isPending,
   };
 }

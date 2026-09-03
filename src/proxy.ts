@@ -5,7 +5,7 @@ const PUBLIC_FILE = /\.(.*)$/;
 const LOCALES = ['ar', 'en'];
 const DEFAULT_LOCALE = 'ar';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Ignore static files, api routes, _next
